@@ -8,12 +8,28 @@
     globalThis.Dialog;
 
   const L = function (key) { return game.i18n.localize(key); };
-
-  const ADJUSTMENTS = {
-    weak:   { label: "弱小", short: "弱", delta: -1, color: "#2980b9" },
-    normal: { label: "普通", short: "普", delta:  0, color: "#7f8c8d" },
-    elite:  { label: "精英", short: "精", delta: +1, color: "#c0392b" }
+  const T = function (key, data) {
+    const full = `PF2EXPTool.${key}`;
+    return data ? game.i18n.format(full, data) : game.i18n.localize(full);
   };
+
+  const ADJ_META = {
+    weak:   { delta: -1, color: "#2980b9" },
+    normal: { delta:  0, color: "#7f8c8d" },
+    elite:  { delta: +1, color: "#c0392b" }
+  };
+  const ADJUSTMENTS = new Proxy({}, {
+    get(_, key) {
+      if (typeof key !== "string" || !ADJ_META[key]) return undefined;
+      return {
+        delta: ADJ_META[key].delta,
+        color: ADJ_META[key].color,
+        label: T(`adj.${key}.label`),
+        short: T(`adj.${key}.short`)
+      };
+    },
+    has(_, key) { return typeof key === "string" && key in ADJ_META; }
+  });
 
   const THREAT_COLORS = {
     trivial:  "#16a085",
@@ -388,23 +404,23 @@
     return `
       <div class="xp-header">
         <div class="xp-stat">
-          <div class="xp-stat-label">人数</div>
+          <div class="xp-stat-label">${T("header.partySize")}</div>
           <div class="xp-stat-value">
             <input type="number" class="xp-input party-size-input" value="${state.partySize}" min="1" style="width:3em">
           </div>
         </div>
         <div class="xp-stat">
-          <div class="xp-stat-label">等级</div>
+          <div class="xp-stat-label">${T("header.partyLevel")}</div>
           <div class="xp-stat-value">
             Lv <input type="number" class="xp-input party-level-input" value="${state.partyLevel}" min="1" style="width:3em">
           </div>
         </div>
         <div class="xp-stat" style="background:${threatColor}22;">
-          <div class="xp-stat-label" style="color:${threatColor}cc">威胁</div>
+          <div class="xp-stat-label" style="color:${threatColor}cc">${T("header.threat")}</div>
           <div class="xp-stat-value" style="color:${threatColor}">${threatLabel}</div>
         </div>
         <div class="xp-stat">
-          <div class="xp-stat-label">XP 总 / 人均</div>
+          <div class="xp-stat-label">${T("header.totalPerPlayer")}</div>
           <div class="xp-stat-value">${state.xp.totalXP} / ${state.xp.xpPerPlayer}</div>
         </div>
       </div>
@@ -427,8 +443,8 @@
     return `
       <div class="xp-bar-wrap">
         <div class="xp-bar-labels">
-          <span>当前 <strong>${current}</strong> XP</span>
-          <span>目标 (4人等效) <strong>${target}</strong> XP</span>
+          <span>${T("progress.currentLabel")} <strong>${current}</strong> XP</span>
+          <span>${T("progress.targetLabel")} <strong>${target}</strong> XP</span>
         </div>
         <div class="xp-bar">
           <div class="xp-bar-fill" style="width:${currentPct}%; background:${fillColor}"></div>
@@ -441,12 +457,12 @@
 
   function renderGapBanner(state) {
     const gap = state.gap;
-    if (gap === 0) return `<div class="gap-banner match">✓ 已达到 4 人等效奖励目标</div>`;
+    if (gap === 0) return `<div class="gap-banner match">${T("gap.match")}</div>`;
     if (gap > 0) {
-      return `<div class="gap-banner under">⬆ 需补 ${gap} XP（每人约 +${Math.round(gap / state.partySize)}）</div>`;
+      return `<div class="gap-banner under">${T("gap.under", { gap, per: Math.round(gap / state.partySize) })}</div>`;
     }
     const abs = Math.abs(gap);
-    return `<div class="gap-banner over">⬇ 超出 ${abs} XP（每人约 -${Math.round(abs / state.partySize)}）</div>`;
+    return `<div class="gap-banner over">${T("gap.over", { abs, per: Math.round(abs / state.partySize) })}</div>`;
   }
 
   // ---------------- 渲染：NPC 列表 ----------------
@@ -462,7 +478,7 @@
       metaHtml = `<span>Lv ${finalLevel}</span><span class="meta-xp">${npcXP} XP</span>`;
     } else {
       metaHtml = `
-        <span style="opacity:0.7">基础 Lv ${npc.baseLevel}</span>
+        <span style="opacity:0.7">${T("npc.baseLevel", { lv: npc.baseLevel })}</span>
         <span class="meta-arrow">→</span>
         <span style="color:${adj.color};font-weight:600">${adj.label} Lv ${finalLevel}</span>
         <span class="meta-xp">${npcXP} XP</span>
@@ -489,20 +505,23 @@
   function renderNpcSection(state) {
     const hasContent = state.npcs.length > 0 || state.hazards.length > 0;
     if (!hasContent) {
-      return `<details open><summary>已选单位</summary><div class="details-body"><p class="empty-msg">未选择任何敌对或陷阱单位。</p></div></details>`;
+      return `<details open><summary>${T("npc.selectedUnits")}</summary><div class="details-body"><p class="empty-msg">${T("npc.empty")}</p></div></details>`;
     }
     const npcsHtml = state.npcs.map((n, i) => renderNpcCard(n, i, state)).join("");
     let hazardsHtml = "";
     if (state.hazards.length > 0) {
-      hazardsHtml = `<div class="hazard-list"><strong>陷阱：</strong>${
+      hazardsHtml = `<div class="hazard-list"><strong>${T("npc.hazardsLabel")}</strong>${
         state.hazards.map(h => `<span style="margin-right:8px">${escapeHtml(h.name)} Lv ${h.level}</span>`).join("")
       }</div>`;
     }
     const changedCount = state.npcs.filter(n => n.previewAdjustment !== n.currentAdjustment).length;
     const summaryExtra = changedCount > 0
-      ? ` <span style="color:#f39c12;font-weight:normal;font-size:11px">(${changedCount} 项待应用)</span>`
+      ? ` <span style="color:#f39c12;font-weight:normal;font-size:11px">${T("npc.pendingApply", { n: changedCount })}</span>`
       : "";
-    const summary = `已选单位 (${state.npcs.length} 怪物${state.hazards.length ? " / " + state.hazards.length + " 陷阱" : ""})${summaryExtra}`;
+    const summaryBody = state.hazards.length > 0
+      ? T("npc.summaryWithHazards", { npcs: state.npcs.length, hazards: state.hazards.length })
+      : T("npc.summary", { npcs: state.npcs.length });
+    const summary = `${T("npc.selectedUnits")} (${summaryBody})${summaryExtra}`;
     return `<details open><summary>${summary}</summary><div class="details-body">${npcsHtml}${hazardsHtml}</div></details>`;
   }
 
@@ -510,9 +529,9 @@
 
   function planToHtml(plan, isAdd, sourceKey, sourceIdx) {
     if (!plan) return "";
-    const actionWord = isAdd ? "添加" : "移除";
+    const actionWord = isAdd ? T("action.add") : T("action.remove");
     const cls = isAdd ? "add" : "remove";
-    const tag = `<span class="plan-tag ${cls}">${isAdd ? "添加" : "移除"}</span>`;
+    const tag = `<span class="plan-tag ${cls}">${actionWord}</span>`;
     const parts = plan.parts.map(p => `
       <div class="plan-line">
         <span class="plan-count">${p.count} ×</span>
@@ -522,15 +541,15 @@
       </div>
     `).join("");
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">(差 ${plan.deviation})</span>`
+      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const actions = plan.totalCount;
     return `
       <div class="plan-card ${cls}" data-plan-kind="add" data-plan-source="${sourceKey || ""}" data-plan-idx="${sourceIdx != null ? sourceIdx : ""}">
         <div class="plan-header">
           ${tag}
-          <strong>${actionWord} ${plan.sum} XP</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${plan.totalCount} 只 / ${plan.distinct} 种 · ${actions} 操作</span>
+          <strong>${T("card.addHeader", { action: actionWord, sum: plan.sum })}</strong>
+          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.addOps", { count: plan.totalCount, distinct: plan.distinct, actions })}</span>
           ${devTag}
         </div>
         <div class="plan-body">${parts}</div>
@@ -543,7 +562,7 @@
     const sumLabel = (deltaSum >= 0 ? "+" : "") + deltaSum + " XP";
     const sumColor = deltaSum >= 0 ? "#27ae60" : "#e67e22";
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">(差 ${plan.deviation})</span>`
+      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const lines = plan.picked.map(op => {
       const fromColor = ADJUSTMENTS[op.fromAdj].color;
@@ -564,11 +583,11 @@
     return `
       <div class="plan-card adjust" data-plan-kind="adjust" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
         <div class="plan-header">
-          <span class="plan-tag adjust">调整</span>
+          <span class="plan-tag adjust">${T("tag.adjust")}</span>
           <strong style="color:${sumColor}">${sumLabel}</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${plan.count} 操作</span>
+          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.adjustOps", { n: plan.count })}</span>
           ${devTag}
-          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="adjust" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">预览此方案</button>
+          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="adjust" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">${T("btn.previewPlan")}</button>
         </div>
         <div class="plan-body">${lines}</div>
       </div>
@@ -579,7 +598,7 @@
     const sumColor = plan.totalSum >= 0 ? "#27ae60" : "#e67e22";
     const sumLabel = (plan.totalSum >= 0 ? "+" : "") + plan.totalSum + " XP";
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">(差 ${plan.deviation})</span>`
+      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const adjustLines = plan.adjustsPicked.map(op => {
       const fromColor = ADJUSTMENTS[op.fromAdj].color;
@@ -598,7 +617,8 @@
         </div>
       `;
     }).join("");
-    const addAction = isAdd ? "添加" : "移除";
+    const addAction = isAdd ? T("action.add") : T("action.remove");
+    const stepLabel = isAdd ? T("card.step2Add") : T("card.step2Remove");
     const addLines = plan.addParts.map(p => `
       <div class="plan-line">
         <span class="plan-count">${p.count} ×</span>
@@ -611,16 +631,16 @@
     return `
       <div class="plan-card composite" data-plan-kind="composite" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
         <div class="plan-header">
-          <span class="plan-tag composite">复合</span>
+          <span class="plan-tag composite">${T("tag.composite")}</span>
           <strong style="color:${sumColor}">${sumLabel}</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${plan.adjustCount} 调整 + ${addAction} ${plan.addCount} 只 · ${totalActions} 操作</span>
+          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.compOps", { adjust: plan.adjustCount, action: addAction, addCount: plan.addCount, total: totalActions })}</span>
           ${devTag}
-          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="composite" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">预览调整部分</button>
+          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="composite" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">${T("btn.previewAdjustOnly")}</button>
         </div>
         <div class="plan-body">
-          <div style="font-size:10px;opacity:0.7;margin-bottom:2px">① 调整：</div>
+          <div style="font-size:10px;opacity:0.7;margin-bottom:2px">${T("card.step1Adjust")}</div>
           ${adjustLines}
-          <div style="font-size:10px;opacity:0.7;margin:4px 0 2px 0">② ${addAction}：</div>
+          <div style="font-size:10px;opacity:0.7;margin:4px 0 2px 0">${stepLabel}</div>
           ${addLines}
         </div>
       </div>
@@ -642,13 +662,13 @@
     const checked = state.showNear ? "checked" : "";
     return `
       <div class="plan-controls">
-        <span class="control-label">排列：</span>
+        <span class="control-label">${T("view.orderLabel")}</span>
         <div class="view-tabs">
-          <button type="button" class="view-tab${byActionsActive}" data-view="by-actions">按操作数</button>
-          <button type="button" class="view-tab${byTypeActive}" data-view="by-type">按方案类型</button>
+          <button type="button" class="view-tab${byActionsActive}" data-view="by-actions">${T("view.byActions")}</button>
+          <button type="button" class="view-tab${byTypeActive}" data-view="by-type">${T("view.byType")}</button>
         </div>
-        <label class="show-near-label" title="勾选后会展示偏离目标值最接近的近似方案">
-          <input type="checkbox" class="show-near-cb" ${checked}> 显示近似方案
+        <label class="show-near-label" title="${T("view.showNearTip")}">
+          <input type="checkbox" class="show-near-cb" ${checked}> ${T("view.showNear")}
         </label>
       </div>
     `;
@@ -662,11 +682,11 @@
       all = getAllPlans(state, true);
       exactCount = 0;
     }
-    if (all.length === 0) return `<p class="empty-msg">无可用方案</p>`;
+    if (all.length === 0) return `<p class="empty-msg">${T("plans.emptyAny")}</p>`;
     const top = all.slice(0, 12);
     const note = (exactCount === 0 && !includeNear)
-      ? `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">无精确方案，自动展示最接近的近似方案：</div>`
-      : `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">按操作数升序（共 ${all.length} 个候选，展示前 ${top.length} 个；同操作数下按 调整→添加/移除→复合 排序）：</div>`;
+      ? `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">${T("plans.noteUnifiedAuto")}</div>`
+      : `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">${T("plans.noteUnifiedAsc", { total: all.length, top: top.length })}</div>`;
     return note + top.map(item => renderPlanItem(item, state)).join("");
   }
 
@@ -680,10 +700,10 @@
     let near = planList.near || [];
     let content = "";
     if (exact.length === 0 && near.length === 0) {
-      return `<details><summary>${sectionTitle}</summary><div class="details-body"><p class="empty-msg">无可用方案</p></div></details>`;
+      return `<details><summary>${sectionTitle}</summary><div class="details-body"><p class="empty-msg">${T("plans.emptyAny")}</p></div></details>`;
     }
     if (exact.length > 0) {
-      content += `<div style="font-size:11px;opacity:0.7;margin:0 0 4px 0">精确匹配（共 ${exact.length} 组）：</div>`;
+      content += `<div style="font-size:11px;opacity:0.7;margin:0 0 4px 0">${T("plans.noteExactCount", { n: exact.length })}</div>`;
       content += exact.map((p, i) => {
         const item = { kind, plan: p, sourceKey: "exact", sourceIdx: i };
         item.actions = planActions(item);
@@ -692,8 +712,8 @@
     }
     if (near.length > 0 && (includeNear || exact.length === 0)) {
       const heading = exact.length === 0
-        ? "无精确匹配，最接近的方案："
-        : "近似方案（备选）：";
+        ? T("plans.noteNearOnly")
+        : T("plans.noteNearAltShort");
       content += `<div style="font-size:11px;opacity:0.7;margin:8px 0 4px 0">${heading}</div>`;
       content += near.map((p, i) => {
         const item = { kind, plan: p, sourceKey: "near", sourceIdx: i };
@@ -706,29 +726,31 @@
 
   function renderTypedPlans(state) {
     const isAdd = state.gap > 0;
-    const addAction = isAdd ? "添加" : "移除";
+    const addAction = isAdd ? T("action.add") : T("action.remove");
     return [
-      renderTypedSection(state, "adjust", `方案 A · 调整现有怪 (精英 / 弱小)`),
-      renderTypedSection(state, "add", `方案 B · ${addAction} 怪物`),
-      renderTypedSection(state, "composite", `方案 C · 调整 + ${addAction} (复合)`)
+      renderTypedSection(state, "adjust", T("plans.sectionAdjust")),
+      renderTypedSection(state, "add", T("plans.sectionAdd", { action: addAction })),
+      renderTypedSection(state, "composite", T("plans.sectionComposite", { action: addAction }))
     ].join("");
   }
 
   function renderPlansSection(state) {
     if (state.gap === 0) {
-      return `<details open><summary>补差值方案</summary><div class="details-body"><p class="empty-msg">已达成目标，无需调整 ✓</p></div></details>`;
+      return `<details open><summary>${T("plans.titleDefault")}</summary><div class="details-body"><p class="empty-msg">${T("plans.done")}</p></div></details>`;
     }
-    const diffLabel = (state.gap > 0 ? "缺 +" : "超 -") + Math.abs(state.gap) + " XP";
+    const diffLabel = state.gap > 0
+      ? T("plans.diffUnder", { abs: Math.abs(state.gap) })
+      : T("plans.diffOver", { abs: Math.abs(state.gap) });
     const inner = state.viewMode === "by-type" ? renderTypedPlans(state) : renderUnifiedPlans(state);
     const wrapped = state.viewMode === "by-type"
       ? inner
-      : `<details open><summary>推荐方案 (按操作数升序)</summary><div class="details-body">${inner}</div></details>`;
+      : `<details open><summary>${T("plans.titleByActions")}</summary><div class="details-body">${inner}</div></details>`;
     return `
       <div style="margin-top:8px">
         ${renderPlanControls(state)}
         ${wrapped}
         <div style="font-size:11px;opacity:0.6;text-align:right;margin-top:4px">
-          当前缺口 ${diffLabel}；目标基于打开宏时怪组 + 当前人数固定
+          ${T("plans.diffLine", { label: diffLabel })}
         </div>
       </div>
     `;
@@ -743,10 +765,10 @@
     }).join("");
     return `
       <details>
-        <summary>单只怪贡献参考表</summary>
+        <summary>${T("ref.title")}</summary>
         <div class="details-body">
           <table class="ref-table">
-            <thead><tr><th>等级</th><th>vs 队伍</th><th>XP</th></tr></thead>
+            <thead><tr><th>${T("ref.level")}</th><th>${T("ref.vsParty")}</th><th>${T("ref.xp")}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -760,10 +782,10 @@
     const dis = canAct ? "" : " disabled";
     return `
       <div class="btn-row">
-        <button type="button" class="btn-pill" id="reset-btn"${dis}>重置预览</button>
+        <button type="button" class="btn-pill" id="reset-btn"${dis}>${T("btn.reset")}</button>
         <div style="flex:1"></div>
         <button type="button" class="btn-pill primary" id="apply-btn"${dis}>
-          ${canAct ? `应用 ${changedCount} 项模板更改` : "无待应用更改"}
+          ${canAct ? T("btn.applyN", { n: changedCount }) : T("btn.noChanges")}
         </button>
       </div>
     `;
@@ -803,7 +825,7 @@
         npc.currentAdjustment = npc.previewAdjustment;
         applied++;
       } catch (e) {
-        console.error(`[${MODULE_ID}] 应用模板失败：`, npc.name, e);
+        console.error(`[${MODULE_ID}] ${T("notif.applyFailed")}:`, npc.name, e);
         failed.push(npc.name);
       }
     }
@@ -907,12 +929,12 @@
     if (applyBtn && !applyBtn.disabled) {
       applyBtn.addEventListener("click", async () => {
         applyBtn.disabled = true;
-        applyBtn.textContent = "应用中…";
+        applyBtn.textContent = T("btn.applying");
         const result = await applyAdjustments(state);
         if (result.failed.length === 0) {
-          ui.notifications.info(`已应用 ${result.applied} 项模板`);
+          ui.notifications.info(T("notif.applied", { n: result.applied }));
         } else {
-          ui.notifications.warn(`已应用 ${result.applied} 项；失败：${result.failed.join("、")}`);
+          ui.notifications.warn(T("notif.partialApplied", { applied: result.applied, names: result.failed.join("、") }));
         }
         refresh();
       });
@@ -937,9 +959,9 @@
     }
 
     dialog = new DialogClass({
-      title: "PF2E XP 预算工具",
+      title: T("title"),
       content: renderContent(state),
-      buttons: { close: { icon: '<i class="fas fa-times"></i>', label: "关闭" } },
+      buttons: { close: { icon: '<i class="fas fa-times"></i>', label: T("btn.close") } },
       default: "close",
       render: html => {
         const formEl = (html && html[0]) || html;
@@ -1032,13 +1054,13 @@
       </form>
     `;
     new DialogClass({
-      title: "队伍信息",
+      title: T("partyDialogTitle"),
       content,
       buttons: {
-        no: { icon: '<i class="fas fa-times"></i>', label: "取消" },
+        no: { icon: '<i class="fas fa-times"></i>', label: T("btn.cancel") },
         yes: {
           icon: '<i class="fas fa-calculator"></i>',
-          label: "计算 XP",
+          label: T("btn.calculate"),
           callback: html => {
             const root = (html && html[0]) || html;
             const partySize = clampInt(root.querySelector('[name="party-size"]').value, 4);
@@ -1057,7 +1079,7 @@
 
   function openFromSelection() {
     if (!game.user || !game.user.isGM) {
-      ui.notifications.warn("此工具仅限 GM 使用");
+      ui.notifications.warn(T("notif.gmOnly"));
       return;
     }
     const tokens = (canvas && canvas.tokens && canvas.tokens.controlled) || [];
@@ -1065,7 +1087,7 @@
     const hazards = buildHazards(tokens);
     const hazardActors = getHazardActors(tokens);
     if (npcs.length === 0 && hazardActors.length === 0) {
-      ui.notifications.error("请至少在场景中选中一个敌对或陷阱 Token（可额外选择 PC）");
+      ui.notifications.error(T("notif.needSelection"));
       return;
     }
     const pcs = getPCs(tokens);
@@ -1091,7 +1113,7 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `${MODULE_ID}-btn`;
-    btn.innerHTML = '<i class="fas fa-calculator"></i> PF2E XP 预算工具';
+    btn.innerHTML = `<i class="fas fa-calculator"></i> ${T("buttonLabel")}`;
     btn.addEventListener("click", () => openFromSelection());
     target.appendChild(btn);
   }

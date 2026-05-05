@@ -1,0 +1,109 @@
+{
+  "PF2EXPTool": {
+    "title": "PF2E XP 预算工具",
+    "buttonLabel": "PF2E XP 预算工具",
+    "partyDialogTitle": "队伍信息",
+    "adj": {
+      "weak":   { "label": "弱小", "short": "弱" },
+      "normal": { "label": "普通", "short": "普" },
+      "elite":  { "label": "精英", "short": "精" }
+    },
+    "tag": {
+      "adjust": "调整",
+      "add": "添加",
+      "remove": "移除",
+      "composite": "复合"
+    },
+    "header": {
+      "partySize": "人数",
+      "partyLevel": "等级",
+      "threat": "威胁",
+      "totalPerPlayer": "XP 总 / 人均"
+    },
+    "progress": {
+      "currentLabel": "当前",
+      "targetLabel": "目标 (4 人等效)"
+    },
+    "gap": {
+      "match": "✓ 已达到 4 人等效奖励目标",
+      "under": "⬆ 需补 {gap} XP（每人约 +{per}）",
+      "over": "⬇ 超出 {abs} XP（每人约 -{per}）"
+    },
+    "npc": {
+      "selectedUnits": "已选单位",
+      "empty": "未选择任何敌对或陷阱单位。",
+      "hazardsLabel": "陷阱：",
+      "pendingApply": "({n} 项待应用)",
+      "baseLevel": "基础 Lv {lv}",
+      "summary": "{npcs} 怪物",
+      "summaryWithHazards": "{npcs} 怪物 / {hazards} 陷阱"
+    },
+    "btn": {
+      "cancel": "取消",
+      "calculate": "计算 XP",
+      "close": "关闭",
+      "reset": "重置预览",
+      "applyN": "应用 {n} 项模板更改",
+      "noChanges": "无待应用更改",
+      "applying": "应用中…",
+      "previewPlan": "预览此方案",
+      "previewAdjustOnly": "预览调整部分"
+    },
+    "notif": {
+      "gmOnly": "此工具仅限 GM 使用",
+      "needSelection": "请至少在场景中选中一个敌对或陷阱 Token（可额外选择 PC）",
+      "applied": "已应用 {n} 项模板",
+      "partialApplied": "已应用 {applied} 项；失败：{names}",
+      "applyFailed": "应用模板失败"
+    },
+    "view": {
+      "orderLabel": "排列：",
+      "byActions": "按操作数",
+      "byType": "按方案类型",
+      "showNear": "显示近似方案",
+      "showNearTip": "勾选后会展示偏离目标值最接近的近似方案"
+    },
+    "plans": {
+      "titleByActions": "推荐方案 (按操作数升序)",
+      "titleDefault": "补差值方案",
+      "emptyAdjustOptions": "无可调整怪物，复合方案需要至少 1 项调整。",
+      "emptyComposite": "无可用复合方案",
+      "emptyAny": "无可用方案",
+      "emptyAdd": "无可用添加方案",
+      "done": "已达成目标，无需调整 ✓",
+      "diffUnder": "缺 +{abs} XP",
+      "diffOver": "超 -{abs} XP",
+      "diffLine": "当前缺口 {label}；目标基于打开宏时怪组 + 当前人数固定",
+      "noteExact": "精确匹配方案（按怪数升序，最多 8 组）：",
+      "noteExactCount": "精确匹配（共 {n} 组）：",
+      "noteNearAlt": "近似方案（备选，按距离升序）：",
+      "noteNearOnly": "无精确匹配，最接近的方案：",
+      "noteNearAltShort": "近似方案（备选）：",
+      "noteUnifiedAuto": "无精确方案，自动展示最接近的近似方案：",
+      "noteUnifiedAsc": "按操作数升序（共 {total} 个候选，展示前 {top} 个；同操作数下按 调整→添加/移除→复合 排序）：",
+      "sectionAdjust": "方案 A · 调整现有怪 (精英 / 弱小)",
+      "sectionAdd": "方案 B · {action} 怪物",
+      "sectionComposite": "方案 C · 调整 + {action} (复合)"
+    },
+    "card": {
+      "adjustOps": "{n} 操作",
+      "addOps": "{count} 只 / {distinct} 种 · {actions} 操作",
+      "compOps": "{adjust} 调整 + {action} {addCount} 只 · {total} 操作",
+      "deviation": "(差 {n})",
+      "addHeader": "{action} {sum} XP",
+      "step1Adjust": "① 调整：",
+      "step2Add": "② 添加：",
+      "step2Remove": "② 移除："
+    },
+    "ref": {
+      "title": "单只怪贡献参考表",
+      "level": "等级",
+      "vsParty": "vs 队伍",
+      "xp": "XP"
+    },
+    "action": {
+      "add": "添加",
+      "remove": "移除"
+    }
+  }
+}

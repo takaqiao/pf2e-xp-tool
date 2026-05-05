@@ -1,0 +1,109 @@
+{
+  "PF2EXPTool": {
+    "title": "PF2E XP Budget Tool",
+    "buttonLabel": "PF2E XP Budget",
+    "partyDialogTitle": "Party Info",
+    "adj": {
+      "weak":   { "label": "Weak",   "short": "W" },
+      "normal": { "label": "Normal", "short": "N" },
+      "elite":  { "label": "Elite",  "short": "E" }
+    },
+    "tag": {
+      "adjust": "Adjust",
+      "add": "Add",
+      "remove": "Remove",
+      "composite": "Combo"
+    },
+    "header": {
+      "partySize": "Size",
+      "partyLevel": "Level",
+      "threat": "Threat",
+      "totalPerPlayer": "Total / Per"
+    },
+    "progress": {
+      "currentLabel": "Current",
+      "targetLabel": "Target (4-player equiv)"
+    },
+    "gap": {
+      "match": "✓ Matches 4-player equivalent target",
+      "under": "⬆ Need +{gap} XP (≈ +{per} per player)",
+      "over": "⬇ Over by {abs} XP (≈ -{per} per player)"
+    },
+    "npc": {
+      "selectedUnits": "Selected units",
+      "empty": "No opposition or hazard token selected.",
+      "hazardsLabel": "Hazards: ",
+      "pendingApply": "({n} pending)",
+      "baseLevel": "Base Lv {lv}",
+      "summary": "{npcs} creature(s)",
+      "summaryWithHazards": "{npcs} creature(s) / {hazards} hazard(s)"
+    },
+    "btn": {
+      "cancel": "Cancel",
+      "calculate": "Calculate XP",
+      "close": "Close",
+      "reset": "Reset preview",
+      "applyN": "Apply {n} template change(s)",
+      "noChanges": "No pending changes",
+      "applying": "Applying…",
+      "previewPlan": "Preview this plan",
+      "previewAdjustOnly": "Preview adjustments only"
+    },
+    "notif": {
+      "gmOnly": "GM-only tool",
+      "needSelection": "Select at least one opposition or hazard token in the scene (PCs optional)",
+      "applied": "Applied {n} template change(s)",
+      "partialApplied": "Applied {applied}; failed: {names}",
+      "applyFailed": "Failed to apply template"
+    },
+    "view": {
+      "orderLabel": "Order: ",
+      "byActions": "By operations",
+      "byType": "By plan type",
+      "showNear": "Show approximate plans",
+      "showNearTip": "When checked, shows the closest non-exact plans"
+    },
+    "plans": {
+      "titleByActions": "Recommended plans (by operation count)",
+      "titleDefault": "Fill plans",
+      "emptyAdjustOptions": "No adjustable creatures; composite needs at least 1 adjustment.",
+      "emptyComposite": "No composite plans available",
+      "emptyAny": "No plans available",
+      "emptyAdd": "No add plans available",
+      "done": "Target met, nothing to adjust ✓",
+      "diffUnder": "Need +{abs} XP",
+      "diffOver": "Over by -{abs} XP",
+      "diffLine": "Current gap: {label}; target is locked at the opening encounter × current party size",
+      "noteExact": "Exact matches (by creature count, up to 8):",
+      "noteExactCount": "Exact matches ({n} total):",
+      "noteNearAlt": "Approximate (backup, by distance):",
+      "noteNearOnly": "No exact match; closest plans:",
+      "noteNearAltShort": "Approximate (backup):",
+      "noteUnifiedAuto": "No exact plans; showing closest approximations:",
+      "noteUnifiedAsc": "Sorted by operations ({total} candidates, top {top}; ties resolved adjust → add/remove → composite):",
+      "sectionAdjust": "Plan A · Adjust existing creatures (elite / weak)",
+      "sectionAdd": "Plan B · {action} creatures",
+      "sectionComposite": "Plan C · Adjust + {action} (combo)"
+    },
+    "card": {
+      "adjustOps": "{n} ops",
+      "addOps": "{count} creature(s) / {distinct} kind(s) · {actions} ops",
+      "compOps": "{adjust} adjust + {action} {addCount} · {total} ops",
+      "deviation": "(off by {n})",
+      "addHeader": "{action} {sum} XP",
+      "step1Adjust": "① Adjust:",
+      "step2Add": "② Add:",
+      "step2Remove": "② Remove:"
+    },
+    "ref": {
+      "title": "Per-creature XP reference",
+      "level": "Level",
+      "vsParty": "vs party",
+      "xp": "XP"
+    },
+    "action": {
+      "add": "Add",
+      "remove": "Remove"
+    }
+  }
+}

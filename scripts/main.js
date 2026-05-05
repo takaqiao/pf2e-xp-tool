@@ -13,16 +13,27 @@
     return data ? game.i18n.format(full, data) : game.i18n.localize(full);
   };
 
+  // PF2e Elite/Weak 模板的实际等级换算（来自 PF2e 系统源码 pf2e.mjs）：
+  //   Elite: base < 1 ? base + 2 : base + 1   (-1→1, 0→2, 1→2, 2→3, ...)
+  //   Weak:  base === 1 ? base - 2 : base - 1 (-1→-2, 0→-1, 1→-1, 2→1, 3→2, ...)
+  function levelDelta(baseLevel, adj) {
+    if (adj === "elite") return baseLevel < 1 ? 2 : 1;
+    if (adj === "weak")  return baseLevel === 1 ? -2 : -1;
+    return 0;
+  }
+  function effectiveLevel(baseLevel, adj) {
+    return baseLevel + levelDelta(baseLevel, adj);
+  }
+
   const ADJ_META = {
-    weak:   { delta: -1, color: "#2980b9" },
-    normal: { delta:  0, color: "#7f8c8d" },
-    elite:  { delta: +1, color: "#c0392b" }
+    weak:   { color: "#2980b9" },
+    normal: { color: "#7f8c8d" },
+    elite:  { color: "#c0392b" }
   };
   const ADJUSTMENTS = new Proxy({}, {
     get(_, key) {
       if (typeof key !== "string" || !ADJ_META[key]) return undefined;
       return {
-        delta: ADJ_META[key].delta,
         color: ADJ_META[key].color,
         label: T(`adj.${key}.label`),
         short: T(`adj.${key}.short`)
@@ -64,8 +75,22 @@
 
   function getBaseLevel(actor) {
     if (!actor) return 0;
+    // PF2e NPC 把 base level 存在 system.details.level.base（不含 elite/weak 调整）
+    const base = actor.system && actor.system.details && actor.system.details.level && actor.system.details.level.base;
+    if (typeof base === "number") return base;
+    // 兜底：用 actor.level 反推（不精确但极少触发）
     const adj = getActorAdjustment(actor);
-    return Number(actor.level) - ADJUSTMENTS[adj].delta;
+    const eff = Number(actor.level);
+    if (adj === "elite") {
+      if (eff <= 1) return -1;
+      if (eff === 2) return 1;
+      return eff - 1;
+    }
+    if (adj === "weak") {
+      if (eff === -1) return 1;
+      return eff + 1;
+    }
+    return eff;
   }
 
   function getThreatColor(rating) { return THREAT_COLORS[rating] || "#7f8c8d"; }
@@ -179,11 +204,11 @@
     const options = [];
     state.npcs.forEach((npc, idx) => {
       const fromAdj = npc.previewAdjustment;
-      const fromLevel = npc.baseLevel + ADJUSTMENTS[fromAdj].delta;
+      const fromLevel = effectiveLevel(npc.baseLevel, fromAdj);
       const fromXP = singleNpcXP(fromLevel, state.partyLevel, state.pwol);
       ["weak", "normal", "elite"].forEach(toAdj => {
         if (toAdj === fromAdj) return;
-        const toLevel = npc.baseLevel + ADJUSTMENTS[toAdj].delta;
+        const toLevel = effectiveLevel(npc.baseLevel, toAdj);
         if (toLevel < -1) return;
         const toXP = singleNpcXP(toLevel, state.partyLevel, state.pwol);
         const deltaXP = toXP - fromXP;
@@ -335,10 +360,10 @@
 
   function recompute(state) {
     if (!state.openingLevels) {
-      state.openingLevels = state.npcs.map(n => n.baseLevel + ADJUSTMENTS[n.currentAdjustment].delta);
+      state.openingLevels = state.npcs.map(n => effectiveLevel(n.baseLevel, n.currentAdjustment));
     }
     const baselineLevels = state.openingLevels;
-    const npcLevels = state.npcs.map(n => n.baseLevel + ADJUSTMENTS[n.previewAdjustment].delta);
+    const npcLevels = state.npcs.map(n => effectiveLevel(n.baseLevel, n.previewAdjustment));
     state.npcLevels = npcLevels;
     state.baselineLevels = baselineLevels;
     state.xp = calculateXP(state.partyLevel, state.partySize, npcLevels, state.hazardActors, state.pwol);
@@ -468,13 +493,13 @@
   // ---------------- 渲染：NPC 列表 ----------------
 
   function renderNpcCard(npc, idx, state) {
-    const finalLevel = npc.baseLevel + ADJUSTMENTS[npc.previewAdjustment].delta;
+    const finalLevel = effectiveLevel(npc.baseLevel, npc.previewAdjustment);
     const changed = npc.previewAdjustment !== npc.currentAdjustment;
     const adj = ADJUSTMENTS[npc.previewAdjustment];
     const npcXP = singleNpcXP(finalLevel, state.partyLevel, state.pwol);
 
     let metaHtml;
-    if (adj.delta === 0) {
+    if (npc.previewAdjustment === "normal") {
       metaHtml = `<span>Lv ${finalLevel}</span><span class="meta-xp">${npcXP} XP</span>`;
     } else {
       metaHtml = `

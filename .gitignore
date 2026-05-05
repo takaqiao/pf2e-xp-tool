@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+*.bak
+*.bak.*
+*.zip
+.venv/
+__pycache__/
+*.pyc
+node_modules/

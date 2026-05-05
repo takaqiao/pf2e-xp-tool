@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read tag version
+        id: version
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION="$TAG"
+          ZIP_NAME="pf2e-xp-tool-v${VERSION}.zip"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Verify module.json version matches tag
+        run: |
+          MJ_VERSION=$(jq -r .version module.json)
+          if [ "$MJ_VERSION" != "${{ steps.version.outputs.version }}" ]; then
+            echo "::error::module.json version ($MJ_VERSION) != tag (${{ steps.version.outputs.version }})"
+            exit 1
+          fi
+          echo "module.json version matches tag: $MJ_VERSION"
+
+      - name: Verify download URL points to this tag
+        run: |
+          DOWNLOAD=$(jq -r .download module.json)
+          EXPECTED=".*/releases/download/${{ steps.version.outputs.tag }}/${{ steps.version.outputs.zip_name }}"
+          if ! echo "$DOWNLOAD" | grep -qE "$EXPECTED"; then
+            echo "::error::module.json download URL ($DOWNLOAD) does not match expected pattern $EXPECTED"
+            exit 1
+          fi
+          echo "download URL ok: $DOWNLOAD"
+
+      - name: Build module zip
+        run: |
+          ZIP_NAME="${{ steps.version.outputs.zip_name }}"
+          zip -r "$ZIP_NAME" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".gitignore" \
+            -x "RELEASE_PROCESS.md" \
+            -x "README.md" \
+            -x "*.zip" \
+            -x "*.bak" \
+            -x "*.bak.*" \
+            -x ".DS_Store" \
+            -x "Thumbs.db"
+          ls -la "$ZIP_NAME"
+          unzip -l "$ZIP_NAME" | tail -10
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: v${{ steps.version.outputs.version }}
+          body_path: .github/release-body-template.md
+          fail_on_unmatched_files: true
+          files: |
+            module.json
+            ${{ steps.version.outputs.zip_name }}
+
+      # Notify the Foundry packages registry so the package page on
+      # foundryvtt.com gets the new version, lastUpdated date, and a
+      # release announcement on the Foundry Discord.
+      - name: Publish to Foundry packages registry
+        env:
+          FOUNDRY_RELEASE_TOKEN: ${{ secrets.FOUNDRY_RELEASE_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [ -z "${FOUNDRY_RELEASE_TOKEN}" ]; then
+            echo "FOUNDRY_RELEASE_TOKEN secret not set; skipping Foundry packages publish."
+            exit 0
+          fi
+          MIN=$(jq -r '.compatibility.minimum // ""' module.json)
+          VER=$(jq -r '.compatibility.verified // ""' module.json)
+          MAX=$(jq -r '.compatibility.maximum // ""' module.json)
+          ID=$(jq -r '.id' module.json)
+          MANIFEST_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/module.json"
+          NOTES_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+
+          BODY=$(jq -n \
+            --arg id "$ID" \
+            --arg version "$VERSION" \
+            --arg manifest "$MANIFEST_URL" \
+            --arg notes "$NOTES_URL" \
+            --arg minimum "$MIN" \
+            --arg verified "$VER" \
+            --arg maximum "$MAX" \
+            '{
+              id: $id,
+              release: {
+                version: $version,
+                manifest: $manifest,
+                notes: $notes,
+                compatibility: ({
+                  minimum: $minimum,
+                  verified: $verified
+                } + (if $maximum != "" then {maximum: $maximum} else {} end))
+              }
+            }')
+
+          echo "Posting to Foundry packages API..."
+          RESP=$(curl -sS --fail-with-body \
+            -X POST https://foundryvtt.com/_api/packages/release_version/ \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${FOUNDRY_RELEASE_TOKEN}" \
+            -d "$BODY")
+          echo "Foundry API response: $RESP"

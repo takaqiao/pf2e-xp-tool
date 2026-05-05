@@ -1,5 +1,13 @@
 # PF2E XP Budget Tool
 
+[![GitHub release](https://img.shields.io/github/v/release/takaqiao/pf2e-xp-tool?style=flat-square&label=release&logo=github)](https://github.com/takaqiao/pf2e-xp-tool/releases/latest)
+[![Foundry version](https://img.shields.io/endpoint?url=https%3A%2F%2Ffoundryshields.com%2Fversion%3Furl%3Dhttps%3A%2F%2Fgithub.com%2Ftakaqiao%2Fpf2e-xp-tool%2Freleases%2Flatest%2Fdownload%2Fmodule.json&style=flat-square)](https://foundryvtt.com/packages/pf2e-xp-tool)
+[![Total downloads](https://img.shields.io/github/downloads/takaqiao/pf2e-xp-tool/total?style=flat-square&label=downloads&color=brightgreen)](https://github.com/takaqiao/pf2e-xp-tool/releases)
+[![Latest downloads](https://img.shields.io/github/downloads/takaqiao/pf2e-xp-tool/latest/total?style=flat-square&label=latest)](https://github.com/takaqiao/pf2e-xp-tool/releases/latest)
+[![Foundry VTT](https://img.shields.io/badge/Foundry%20VTT-v12%20%7C%20v14-orange?style=flat-square&logo=foundryvirtualtabletop&logoColor=white)](https://foundryvtt.com/)
+[![Pathfinder 2e](https://img.shields.io/badge/system-PF2e-c1272d?style=flat-square)](https://foundryvtt.com/packages/pf2e)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](#license)
+
 Encounter XP budget visualizer for the Pathfinder 2e system on Foundry VTT.
 
 ## Install

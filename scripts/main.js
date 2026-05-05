@@ -97,13 +97,29 @@
 
   // ---------------- XP 计算 ----------------
 
+  // PF2e 标准 XP 表（CRB Table 10-2，源自 pf2e.mjs:30920+）
+  const STANDARD_XP_MAP = {
+    "-4": 10, "-3": 15, "-2": 20, "-1": 30, "0": 40,
+    "1": 60, "2": 80, "3": 120, "4": 160
+  };
+  const PWOL_XP_MAP = {
+    "-7": 9, "-6": 12, "-5": 14, "-4": 18, "-3": 21, "-2": 26, "-1": 32, "0": 40,
+    "1": 48, "2": 60, "3": 72, "4": 90, "5": 108, "6": 135, "7": 160
+  };
+
+  function xpForDelta(delta, pwol) {
+    const map = pwol ? PWOL_XP_MAP : STANDARD_XP_MAP;
+    const range = pwol ? 7 : 4;
+    const bounded = Math.max(-range, Math.min(range, delta));
+    return map[String(bounded)] || 0;
+  }
+
   function calculateXP(partyLevel, partySize, npcLevels, hazards, pwol) {
     return game.pf2e.gm.calculateXP(partyLevel, partySize, npcLevels, hazards, { pwol: pwol });
   }
 
   function singleNpcXP(level, partyLevel, pwol) {
-    const r = calculateXP(partyLevel, 4, [level], [], pwol);
-    return Number(r && r.totalXP ? r.totalXP : 0);
+    return xpForDelta(level - partyLevel, pwol);
   }
 
   function getCreatureXpOptions(partyLevel, pwol) {
@@ -113,7 +129,7 @@
     for (let delta = minDelta; delta <= maxDelta; delta++) {
       const level = partyLevel + delta;
       if (level < -1) continue;
-      const xp = singleNpcXP(level, partyLevel, pwol);
+      const xp = xpForDelta(delta, pwol);
       if (xp > 0) options.push({ delta, level, xp });
     }
     options.sort((a, b) => b.xp - a.xp || b.delta - a.delta);
@@ -783,19 +799,40 @@
 
   // ---------------- 渲染：参考表 + 底部按钮 ----------------
 
+  // 始终展示完整 Table 10-2（9 行 / PWoL 15 行），含建议角色（Suggested Role）
+  function getReferenceTable(partyLevel, pwol) {
+    const minDelta = pwol ? -7 : -4;
+    const maxDelta = pwol ? 7 : 4;
+    const rows = [];
+    for (let delta = minDelta; delta <= maxDelta; delta++) {
+      const level = partyLevel + delta;
+      const xp = xpForDelta(delta, pwol);
+      const exists = level >= -1;
+      const roleKey = !pwol && delta >= -4 && delta <= 4 ? `ref.role.${delta >= 0 ? "p" + delta : "n" + (-delta)}` : null;
+      rows.push({ delta, level, xp, exists, roleKey });
+    }
+    return rows;
+  }
+
   function renderReferenceSection(state) {
-    const rows = state.options.slice().sort((a, b) => a.delta - b.delta).map(o => {
-      const rowCls = o.delta === 0 ? " party" : "";
-      return `<tr class="ref-row${rowCls}"><td>Lv ${o.level}</td><td>${signed(o.delta)}</td><td>${o.xp}</td></tr>`;
+    const ref = getReferenceTable(state.partyLevel, state.pwol);
+    const rows = ref.map(o => {
+      const rowCls = (o.delta === 0 ? " party" : "") + (!o.exists ? " missing" : "");
+      const levelCell = o.exists
+        ? `Lv ${o.level}`
+        : `<span style="opacity:0.5">Lv ${o.level}</span> <span style="opacity:0.5;font-size:10px">(N/A)</span>`;
+      const role = o.roleKey ? T(o.roleKey) : "";
+      return `<tr class="ref-row${rowCls}"><td>${levelCell}</td><td>${signed(o.delta)}</td><td>${o.xp}</td><td style="text-align:left;font-size:11px;opacity:0.85">${role}</td></tr>`;
     }).join("");
     return `
       <details>
         <summary>${T("ref.title")}</summary>
         <div class="details-body">
           <table class="ref-table">
-            <thead><tr><th>${T("ref.level")}</th><th>${T("ref.vsParty")}</th><th>${T("ref.xp")}</th></tr></thead>
+            <thead><tr><th>${T("ref.level")}</th><th>${T("ref.vsParty")}</th><th>${T("ref.xp")}</th><th style="text-align:left">${T("ref.roleHeader")}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          <div style="font-size:11px;opacity:0.6;margin-top:4px">${T("ref.note")}</div>
         </div>
       </details>
     `;

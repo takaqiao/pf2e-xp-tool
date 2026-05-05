@@ -96,10 +96,23 @@
       "step2Remove": "② Remove:"
     },
     "ref": {
-      "title": "Per-creature XP reference",
+      "title": "Per-creature XP reference (Table 10-2)",
       "level": "Level",
       "vsParty": "vs party",
-      "xp": "XP"
+      "xp": "XP",
+      "roleHeader": "Suggested role",
+      "note": "Rows marked N/A are below Lv -1: PF2e has no such creatures, shown for XP-table reference only.",
+      "role": {
+        "n4": "Low-threat lackey",
+        "n3": "Low- or moderate-threat lackey",
+        "n2": "Any lackey or standard creature",
+        "n1": "Any standard creature",
+        "p0": "Any standard creature or low-threat boss",
+        "p1": "Low- or moderate-threat boss",
+        "p2": "Moderate- or severe-threat boss",
+        "p3": "Severe- or extreme-threat boss",
+        "p4": "Extreme-threat solo boss"
+      }
     },
     "action": {
       "add": "Add",

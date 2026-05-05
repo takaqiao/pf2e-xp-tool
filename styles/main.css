@@ -70,6 +70,7 @@
 .xp-tool .ref-table th, .xp-tool .ref-table td { padding: 3px 6px; text-align: center; border-bottom: 1px solid #8882; }
 .xp-tool .ref-table th { background: #8881; }
 .xp-tool .ref-row.party td { background: #2980b922; font-weight: 700; }
+.xp-tool .ref-row.missing td { opacity: 0.55; font-style: italic; }
 
 .xp-tool .btn-row { display: flex; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #8884; }
 .xp-tool .btn-pill { padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; border: 1px solid #8886; background: #8882; color: inherit; line-height: 1.3; }

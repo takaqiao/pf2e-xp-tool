@@ -1,48 +1,54 @@
-# PF2E XP 预算工具
+# PF2E XP Budget Tool
 
-PF2e 系统的遭遇 XP 预算可视化工具，支持精英/弱小模板预览与多策略补差值方案。
+Encounter XP budget visualizer for the Pathfinder 2e system on Foundry VTT.
 
-## 安装
+## Install
 
-在 Foundry → **附加模块 → 安装模块** 中粘贴 manifest URL：
+In Foundry → **Add-on Modules → Install Module**, paste the manifest URL:
 
 ```
 https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json
 ```
 
-兼容性：Foundry VTT v12 ~ v14，PF2e 系统。
+Compatibility: Foundry VTT v12 ~ v14, PF2e system.
 
-## 用法
+Languages: English, Simplified Chinese (UI follows the Foundry client language).
 
-启用模组后，侧边栏 **宏 (Macros)** 与 **角色 (Actors)** 标签底部会出现 `📐 PF2E XP 预算工具` 蓝色按钮（仅 GM 可见）。
+## Usage
 
-工作流：
-1. 在场景中选中要测量的怪物 token（可选 PC token；若无 PC 会弹窗询问队伍人数/等级）
-2. 点击按钮 → 工具窗口打开
-3. 顶部显示队伍人数 / 等级 / 威胁等级 / 总 XP，进度条标出 4 人等效预算位置
-4. 每只怪卡片有 `[弱][普][精]` 切换，实时预览 XP 影响
-5. 下方"推荐方案"区按操作数升序展示前 N 个精确补差值组合：
-   - **调整** - 仅切换现有怪的精英/弱小模板
-   - **添加 / 移除** - 增减若干新怪
-   - **复合** - 同时调整 + 加/减
-6. 卡片右上 `[预览此方案]` 一键把所有相关 NPC 的 preview 设到方案对应模板
-7. 底部 `[应用 N 项模板更改]` 写回 actor
+After enabling the module, a blue button labelled `PF2E XP Budget` appears at the bottom of the sidebar **Macros** and **Actors** tabs (GM only).
 
-## 设计说明
+Workflow:
 
-- **target 锁定为打开瞬间 baseline**：切换 preview 不会让目标跑动；只在你改 partySize/Level 时调整
-- **默认只显示精确方案**：勾选"显示近似方案"或在完全无精确解时自动 fallback
-- **操作数定义**：1 个精英/弱小切换 = 1 操作；加/减一只怪 = 1 操作（多只多操作）
+1. Select opposition tokens in the scene (PC tokens optional; without PCs the tool prompts for party size / level).
+2. Click the button to open the tool window.
+3. The header shows party size / level / threat rating / total XP. A progress bar marks the 4-player equivalent budget.
+4. Each creature card has `[W][N][E]` toggles for live elite / weak preview.
+5. The "Recommended plans" panel shows exact fill plans sorted by operation count:
+   - **Adjust** — toggle elite/weak on existing creatures only
+   - **Add / Remove** — add or remove a number of new creatures
+   - **Combo** — both at once
+6. Each plan card has a `Preview this plan` button that pushes the plan's adjustments into all related NPC previews at once.
+7. The footer `Apply N template change(s)` button writes previews back to the actors.
 
-也可在宏中调用：
+## Design notes
+
+- **Target is locked to the opening baseline**: switching preview doesn't make the target chase you; it only changes when you edit party size / level.
+- **Exact plans only by default**: check "Show approximate plans", or rely on the auto-fallback when no exact plan exists.
+- **Operation count**: 1 elite/weak toggle = 1 op; adding or removing 1 creature = 1 op (more creatures = more ops). Lower op count is preferred.
+- **Elite / Weak math** follows the PF2e CRB exactly (`pf2e.mjs`):
+  - Elite: `base < 1 ? base + 2 : base + 1` (so -1→1, 0→2, 1→2, 2→3, ...)
+  - Weak: `base === 1 ? base - 2 : base - 1` (so -1→-2, 0→-1, 1→-1, 2→1, ...)
+
+You can also invoke the tool from a macro:
 
 ```javascript
 PF2EXPTool.open();
 ```
 
-## 发布流程
+## Release process
 
-见 [RELEASE_PROCESS.md](./RELEASE_PROCESS.md)。
+See [RELEASE_PROCESS.md](./RELEASE_PROCESS.md).
 
 ## License
 

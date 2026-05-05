@@ -1,17 +1,16 @@
-## 安装 / Install
+## Install
 
-在 Foundry → **附加模块 → 安装模块** 中粘贴以下 manifest URL：
+In Foundry → **Add-on Modules → Install Module**, paste the manifest URL:
 
 ```
 https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json
 ```
 
-## 兼容性 / Compatibility
+## Compatibility
 
 - Foundry VTT v12 ~ v14
-- PF2e 系统
+- PF2e system
 
-## 变更 / Changes
+## Changes
 
-详细变更请见本次发布对应的提交记录。
 See the commits associated with this tag for the full change list.

@@ -13,9 +13,9 @@
     return data ? game.i18n.format(full, data) : game.i18n.localize(full);
   };
 
-  // PF2e Elite/Weak 模板的实际等级换算（来自 PF2e 系统源码 pf2e.mjs）：
-  //   Elite: base < 1 ? base + 2 : base + 1   (-1→1, 0→2, 1→2, 2→3, ...)
-  //   Weak:  base === 1 ? base - 2 : base - 1 (-1→-2, 0→-1, 1→-1, 2→1, 3→2, ...)
+  // PF2e Elite/Weak adjustment math, mirroring pf2e.mjs:
+  //   Elite: base < 1 ? base + 2 : base + 1   (-1->1, 0->2, 1->2, 2->3, ...)
+  //   Weak:  base === 1 ? base - 2 : base - 1 (-1->-2, 0->-1, 1->-1, 2->1, 3->2, ...)
   function levelDelta(baseLevel, adj) {
     if (adj === "elite") return baseLevel < 1 ? 2 : 1;
     if (adj === "weak")  return baseLevel === 1 ? -2 : -1;
@@ -50,7 +50,7 @@
     extreme:  "#c0392b"
   };
 
-  // ---------------- 工具函数 ----------------
+  // ---------------- helpers ----------------
 
   function clampInt(value, fallback) {
     const n = Math.abs(Math.trunc(Number(value)));
@@ -75,10 +75,10 @@
 
   function getBaseLevel(actor) {
     if (!actor) return 0;
-    // PF2e NPC 把 base level 存在 system.details.level.base（不含 elite/weak 调整）
+    // PF2e NPCs store base level (without elite/weak) at system.details.level.base
     const base = actor.system && actor.system.details && actor.system.details.level && actor.system.details.level.base;
     if (typeof base === "number") return base;
-    // 兜底：用 actor.level 反推（不精确但极少触发）
+    // Fallback: derive base from actor.level (rarely hit; not always unique at boundaries)
     const adj = getActorAdjustment(actor);
     const eff = Number(actor.level);
     if (adj === "elite") {
@@ -95,9 +95,9 @@
 
   function getThreatColor(rating) { return THREAT_COLORS[rating] || "#7f8c8d"; }
 
-  // ---------------- XP 计算 ----------------
+  // ---------------- XP math ----------------
 
-  // PF2e 标准 XP 表（CRB Table 10-2，源自 pf2e.mjs:30920+）
+  // PF2e standard XP table (CRB Table 10-2, mirrors pf2e.mjs:30920+)
   const STANDARD_XP_MAP = {
     "-4": 10, "-3": 15, "-2": 20, "-1": 30, "0": 40,
     "1": 60, "2": 80, "3": 120, "4": 160
@@ -397,7 +397,7 @@
     );
   }
 
-  // ---------------- 操作数计算 / 方案合并 ----------------
+  // ---------------- operation count / unified plan list ----------------
 
   function planActions(item) {
     if (item.kind === "adjust") return item.plan.picked.length;
@@ -435,9 +435,8 @@
     return all;
   }
 
-  // 占位：渲染、监听、入口由后续 cat 追加
 
-  // ---------------- 渲染：状态摘要 ----------------
+  // ---------------- render: header / progress / gap ----------------
 
   function renderHeader(state) {
     const threatLabel = L("PF2E.Encounter.Budget.Threats." + state.xp.rating);
@@ -506,7 +505,7 @@
     return `<div class="gap-banner over">${T("gap.over", { abs, per: Math.round(abs / state.partySize) })}</div>`;
   }
 
-  // ---------------- 渲染：NPC 列表 ----------------
+  // ---------------- render: NPC list ----------------
 
   function renderNpcCard(npc, idx, state) {
     const finalLevel = effectiveLevel(npc.baseLevel, npc.previewAdjustment);
@@ -566,7 +565,7 @@
     return `<details open><summary>${summary}</summary><div class="details-body">${npcsHtml}${hazardsHtml}</div></details>`;
   }
 
-  // ---------------- 渲染：单个方案卡片 ----------------
+  // ---------------- render: individual plan cards ----------------
 
   function planToHtml(plan, isAdd, sourceKey, sourceIdx) {
     if (!plan) return "";
@@ -695,7 +694,7 @@
     return "";
   }
 
-  // ---------------- 渲染：方案区域（按操作数 / 按类型） ----------------
+  // ---------------- render: plan area (by-actions / by-type) ----------------
 
   function renderPlanControls(state) {
     const byActionsActive = state.viewMode === "by-actions" ? " active" : "";
@@ -797,9 +796,9 @@
     `;
   }
 
-  // ---------------- 渲染：参考表 + 底部按钮 ----------------
+  // ---------------- render: reference table + footer actions ----------------
 
-  // 始终展示完整 Table 10-2（9 行 / PWoL 15 行），含建议角色（Suggested Role）
+  // Always renders the full Table 10-2 (9 rows / 15 for PWoL) with the Suggested Role column
   function getReferenceTable(partyLevel, pwol) {
     const minDelta = pwol ? -7 : -4;
     const maxDelta = pwol ? 7 : 4;
@@ -867,7 +866,7 @@
     `;
   }
 
-  // ---------------- 应用模板（写回 token / actor） ----------------
+  // ---------------- apply templates (write back to token / actor) ----------------
 
   async function applyAdjustments(state) {
     const changed = state.npcs.filter(n => n.previewAdjustment !== n.currentAdjustment);
@@ -894,7 +893,7 @@
     return { applied, failed };
   }
 
-  // ---------------- 监听器 ----------------
+  // ---------------- listeners ----------------
 
   function attachListeners(rootEl, state, refresh) {
     rootEl.querySelectorAll(".adj-btn").forEach(btn => {
@@ -996,14 +995,14 @@
         if (result.failed.length === 0) {
           ui.notifications.info(T("notif.applied", { n: result.applied }));
         } else {
-          ui.notifications.warn(T("notif.partialApplied", { applied: result.applied, names: result.failed.join("、") }));
+          ui.notifications.warn(T("notif.partialApplied", { applied: result.applied, names: result.failed.join(", ") }));
         }
         refresh();
       });
     }
   }
 
-  // ---------------- 对话框 ----------------
+  // ---------------- dialog ----------------
 
   function showXPTool(state) {
     recompute(state);
@@ -1037,7 +1036,7 @@
     dialog.render(true);
   }
 
-  // ---------------- 选择构建 / 入口 ----------------
+  // ---------------- selection / entry points ----------------
 
   function buildNpcs(tokens) {
     return tokens.filter(t => {
@@ -1157,7 +1156,7 @@
     else openTool(pcs[0].level, pcs.length, npcs, hazards, hazardActors);
   }
 
-  // ---------------- 公开 API + Hooks ----------------
+  // ---------------- public API + hooks ----------------
 
   globalThis.PF2EXPTool = { open: openFromSelection };
 

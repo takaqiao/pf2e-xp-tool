@@ -1,85 +1,92 @@
-# pf2e-xp-tool 发布流程
+# Release process
 
-## 仓库结构
+## Repository layout
 
 ```
 pf2e-xp-tool/
-├── module.json                  # FVTT 模组描述（id / version / manifest / download / compatibility 等）
-├── scripts/main.js              # 主代码（Hooks 注册按钮 + XP 工具实现）
-├── styles/main.css              # UI 样式（已用 .xp-tool 命名空间隔离）
+├── module.json                  # FVTT module descriptor (id / version / manifest / download / compatibility)
+├── scripts/main.js              # Main code (Hooks register the sidebar button + XP tool)
+├── styles/main.css              # UI styles, namespaced under .xp-tool
+├── lang/
+│   ├── en.json                  # English translation
+│   └── cn.json                  # Simplified Chinese (PF2e community uses lang code `cn`; also aliased to `zh-CN`)
 ├── .github/
-│   ├── workflows/release.yml    # 推 tag 自动构建 release
-│   └── release-body-template.md # release notes 模板
+│   ├── workflows/release.yml    # Pushing a tag triggers an automated release
+│   └── release-body-template.md # Release notes template
 ├── .gitignore
 ├── README.md
-└── RELEASE_PROCESS.md           # 本文件
+└── RELEASE_PROCESS.md           # This file
 ```
 
-## 每次发布的标准流程
+## Per-release checklist
 
-### 1. 修改代码
+### 1. Code changes
 
-在 `scripts/main.js` / `styles/main.css` 改完后，本地放入 FVTT modules 目录测试通过。
+Edit `scripts/main.js` / `styles/main.css` / `lang/*.json` and verify the module locally inside FVTT.
 
-### 2. 同步更新 `module.json`（三处必改）
+### 2. Update three fields in `module.json`
 
-把 `X.Y.Z` 替换为新版本号：
+Replace `X.Y.Z` with the new version:
 
-| 字段 | 新值 |
+| Field | Value |
 |---|---|
 | `version` | `X.Y.Z` |
 | `download` | `https://github.com/takaqiao/pf2e-xp-tool/releases/download/X.Y.Z/pf2e-xp-tool-vX.Y.Z.zip` |
 | `changelog` | `https://github.com/takaqiao/pf2e-xp-tool/releases/tag/X.Y.Z` |
 
-`manifest` 字段固定指向 `releases/latest/download/module.json`，不用动。
+`manifest` is fixed at `releases/latest/download/module.json` and should not change.
 
-### 3. Commit & push
+### 3. Commit and push
 
 ```bash
 git add -A
-git commit -m "release: vX.Y.Z - <简要变更>"
+git commit -m "release: vX.Y.Z - <short summary>"
 git push
 ```
 
-### 4. 打 tag 并推送（触发 release workflow）
+### 4. Tag and push the tag (triggers the release workflow)
 
 ```bash
 git tag X.Y.Z
 git push origin X.Y.Z
 ```
 
-> 注意 tag 名不带 `v` 前缀（workflow 用 `[0-9]+.[0-9]+.[0-9]+` 匹配）。
+> Tag names must not have a `v` prefix — the workflow matches `[0-9]+.[0-9]+.[0-9]+`.
 
-### 5. 等 GitHub Actions 跑完
+### 5. Wait for GitHub Actions
 
-`.github/workflows/release.yml` 会：
-1. 校验 `module.json` 的 `version` == tag
-2. 校验 `download` URL 含正确 tag 与 zip 名
-3. 打包 zip（排除 `.git/` `.github/` `RELEASE_PROCESS.md` `README.md` `*.zip` 等）
-4. 创建 GitHub Release，附上 `module.json` 和 `pf2e-xp-tool-vX.Y.Z.zip`
-5. 如果配置了 `FOUNDRY_RELEASE_TOKEN` secret，则推送到 foundryvtt.com 包注册表
+`.github/workflows/release.yml` will:
 
-### 6. 验证 release
+1. Verify `module.json` `version` equals the tag.
+2. Verify the `download` URL contains the right tag and zip name.
+3. Build the zip, excluding `.git/`, `.github/`, `RELEASE_PROCESS.md`, `README.md`, `*.zip`, etc.
+4. Create a GitHub Release with `module.json` and `pf2e-xp-tool-vX.Y.Z.zip` attached.
+5. If `FOUNDRY_RELEASE_TOKEN` secret is set, ping the foundryvtt.com packages registry so the package page picks up the new version.
 
-打开 https://github.com/takaqiao/pf2e-xp-tool/releases/latest 确认有两个文件：
-- `module.json`（FVTT manifest 检查更新用）
-- `pf2e-xp-tool-vX.Y.Z.zip`（FVTT 下载用）
+### 6. Verify the release
 
-FVTT 端粘贴 manifest URL：
-`https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json`
+Open `https://github.com/takaqiao/pf2e-xp-tool/releases/latest` and confirm both files are attached:
 
-## 常见错误
+- `module.json` (FVTT uses this for update checks)
+- `pf2e-xp-tool-vX.Y.Z.zip` (FVTT downloads this)
 
-- **忘记同步 `module.json` 的 `version`**：workflow 第一步会失败
-- **`download` URL 与 tag 不一致**：workflow 第二步会失败
-- **tag 名带了 `v` 前缀**（写成 `v1.0.1`）：workflow 不会触发（只匹配纯数字版本）
-- **改了代码但没打新 tag**：FVTT 端不会获得更新
+FVTT install URL:
 
-## Foundry 包注册表（可选）
+```
+https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json
+```
 
-要让 foundryvtt.com 的模组页自动显示新版本：
+## Common pitfalls
 
-1. 去 https://foundryvtt.com/auth/profile/ 申请 packages release token
-2. 在 GitHub 仓库 Settings → Secrets and variables → Actions → New repository secret
-3. Name: `FOUNDRY_RELEASE_TOKEN`，Value: 上面拿到的 token
-4. 后续每次 release workflow 跑完会自动通知 foundryvtt.com
+- **`module.json` `version` not bumped** — workflow step 1 fails.
+- **`download` URL doesn't match the tag** — workflow step 2 fails.
+- **Tag has a `v` prefix** (e.g. `v1.0.1`) — workflow does not trigger.
+- **Code changed but no new tag** — FVTT clients won't see an update.
+
+## Foundry packages registry (optional)
+
+To have foundryvtt.com auto-pick up new versions:
+
+1. Create a packages release token at https://foundryvtt.com/auth/profile/.
+2. Add it as a repo secret: Settings → Secrets and variables → Actions → New repository secret → name `FOUNDRY_RELEASE_TOKEN`.
+3. Subsequent release workflows will publish there automatically.

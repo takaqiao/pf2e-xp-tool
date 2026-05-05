@@ -1,0 +1,24 @@
+{
+  "id": "pf2e-xp-tool",
+  "title": "PF2E XP 预算工具",
+  "description": "可视化 PF2E 遭遇 XP 预算：实时精英/弱小模板预览、按操作数排序的精确补差值方案（调整 / 添加 / 减少 / 复合）。在侧边栏宏与角色页底部提供入口按钮。",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system"
+      }
+    ]
+  },
+  "scripts": ["scripts/main.js"],
+  "styles": ["styles/main.css"],
+  "authors": [{ "name": "GM" }],
+  "url": "",
+  "manifest": "",
+  "download": ""
+}

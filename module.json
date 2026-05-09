@@ -2,7 +2,7 @@
     "id": "pf2e-xp-tool",
     "title": "PF2E XP Budget Tool",
     "description": "Encounter XP budget visualizer for PF2e: live elite/weak template preview, exact fill plans sorted by operation count (adjust / add / remove / combo), and a sidebar button on the Macros and Actors tabs. Bilingual UI (English and Simplified Chinese, follows the Foundry client language).",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "compatibility": {
         "minimum": "12",
         "verified": "14",
@@ -31,7 +31,7 @@
     ],
     "url": "https://github.com/takaqiao/pf2e-xp-tool",
     "manifest": "https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json",
-    "download": "https://github.com/takaqiao/pf2e-xp-tool/releases/download/1.5.0/pf2e-xp-tool-v1.5.0.zip",
+    "download": "https://github.com/takaqiao/pf2e-xp-tool/releases/download/1.5.1/pf2e-xp-tool-v1.5.1.zip",
     "bugs": "https://github.com/takaqiao/pf2e-xp-tool/issues",
-    "changelog": "https://github.com/takaqiao/pf2e-xp-tool/releases/tag/1.5.0"
+    "changelog": "https://github.com/takaqiao/pf2e-xp-tool/releases/tag/1.5.1"
 }

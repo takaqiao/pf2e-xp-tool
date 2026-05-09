@@ -57,6 +57,12 @@
     return Number.isFinite(n) && n > 0 ? n : fallback;
   }
 
+  function clampFloat(value, fallback) {
+    const n = Math.abs(Number(value));
+    if (!Number.isFinite(n) || n <= 0) return fallback;
+    return Math.round(n * 100) / 100;
+  }
+
   function signed(n) { return n >= 0 ? "+" + n : String(n); }
 
   function escapeHtml(s) {
@@ -446,7 +452,7 @@
         <div class="xp-stat">
           <div class="xp-stat-label">${T("header.partySize")}</div>
           <div class="xp-stat-value">
-            <input type="number" class="xp-input party-size-input" value="${state.partySize}" min="1" style="width:3em">
+            <input type="number" class="xp-input party-size-input" value="${state.partySize}" min="1" step="0.5" style="width:4em">
           </div>
         </div>
         <div class="xp-stat">
@@ -950,7 +956,7 @@
     const sizeInput = rootEl.querySelector(".party-size-input");
     if (sizeInput) {
       sizeInput.addEventListener("change", e => {
-        const v = clampInt(e.target.value, state.partySize);
+        const v = clampFloat(e.target.value, state.partySize);
         if (v !== state.partySize) {
           state.partySize = v;
           try { localStorage.setItem("xpMacroPartySize", String(v)); } catch (_) {}
@@ -1100,13 +1106,13 @@
   }
 
   function askPartyAndOpen(npcs, hazards, hazardActors) {
-    const savedSize = clampInt(localStorage.getItem("xpMacroPartySize"), 4);
+    const savedSize = clampFloat(localStorage.getItem("xpMacroPartySize"), 4);
     const savedLevel = clampInt(localStorage.getItem("xpMacroPartyLevel"), 1);
     const content = `
       <form>
         <div class="form-group">
           <label>${L("PF2E.Encounter.Budget.PartySize")}</label>
-          <input name="party-size" type="number" value="${savedSize}" min="1">
+          <input name="party-size" type="number" value="${savedSize}" min="1" step="0.5">
         </div>
         <div class="form-group">
           <label>${L("PF2E.Encounter.Budget.PartyLevel")}</label>
@@ -1124,7 +1130,7 @@
           label: T("btn.calculate"),
           callback: html => {
             const root = (html && html[0]) || html;
-            const partySize = clampInt(root.querySelector('[name="party-size"]').value, 4);
+            const partySize = clampFloat(root.querySelector('[name="party-size"]').value, 4);
             const partyLevel = clampInt(root.querySelector('[name="party-level"]').value, 1);
             try {
               localStorage.setItem("xpMacroPartySize", String(partySize));

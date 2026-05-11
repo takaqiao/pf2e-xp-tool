@@ -976,10 +976,11 @@
     target.appendChild(btn);
   }
 
-  // ---------------- i18n fallback (inlined, survives bad lang-file cache) ----------------
-  // Foundry only loads lang/*.json on world start. If a stale cn.json is cached by
-  // a CDN/proxy/browser, key lookups fall through to en.json. We register the full
-  // dictionary here too and fill any keys missing from game.i18n.translations.
+  // ---------------- i18n source-of-truth (inlined, overrides any stale lang-file cache) ----------------
+  // Foundry only loads lang/*.json on world start. A stale cached cn.json with old
+  // placeholders ({gap}/{per}) plus new JS that passes {n} produces "需补 undefined
+  // XP". We treat the JS-inlined dict as authoritative and overwrite the merged
+  // PF2EXPTool subtree at i18nInit so placeholders always match.
   const I18N_FALLBACK = {
     en: {
       title: "PF2E XP Budget Tool", buttonLabel: "PF2E XP Budget", partyDialogTitle: "Party Info",
@@ -1078,24 +1079,11 @@
   };
   const I18N_LANG_ALIAS = { "zh-CN": "cn", "zh-Hans": "cn", "zh": "cn" };
 
-  function fillMissingTranslations(target, source) {
-    for (const k of Object.keys(source)) {
-      const v = source[k];
-      if (v && typeof v === "object" && !Array.isArray(v)) {
-        if (!target[k] || typeof target[k] !== "object") target[k] = {};
-        fillMissingTranslations(target[k], v);
-      } else if (target[k] === undefined) {
-        target[k] = v;
-      }
-    }
-  }
-
   Hooks.once("i18nInit", () => {
     const lang = (game.i18n && game.i18n.lang) || "en";
     const key = I18N_FALLBACK[lang] ? lang : (I18N_LANG_ALIAS[lang] || "en");
-    const dict = I18N_FALLBACK[key] || I18N_FALLBACK.en;
-    if (!game.i18n.translations.PF2EXPTool) game.i18n.translations.PF2EXPTool = {};
-    fillMissingTranslations(game.i18n.translations.PF2EXPTool, dict);
+    // Wholesale replace: inlined dict is authoritative.
+    game.i18n.translations.PF2EXPTool = foundry.utils.deepClone(I18N_FALLBACK[key] || I18N_FALLBACK.en);
   });
 
   Hooks.once("init", () => {

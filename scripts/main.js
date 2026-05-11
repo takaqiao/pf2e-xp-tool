@@ -389,10 +389,12 @@
 
   // ---------------- operation count / unified plan list ----------------
 
+  // 任意数量的精英/弱小模板调整最终都是一次"应用 N 项模板更改"点击 → 算 1 步。
+  // 添加/移除怪每只是独立操作 → 每只 1 步。复合 = 1 步调整批 + N 步添加。
   function planActions(item) {
-    if (item.kind === "adjust") return item.plan.picked.length;
+    if (item.kind === "adjust") return 1;
     if (item.kind === "add") return item.plan.totalCount;
-    if (item.kind === "composite") return item.plan.adjustCount + item.plan.addCount;
+    if (item.kind === "composite") return 1 + item.plan.addCount;
     return 0;
   }
 

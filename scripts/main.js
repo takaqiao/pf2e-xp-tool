@@ -976,6 +976,128 @@
     target.appendChild(btn);
   }
 
+  // ---------------- i18n fallback (inlined, survives bad lang-file cache) ----------------
+  // Foundry only loads lang/*.json on world start. If a stale cn.json is cached by
+  // a CDN/proxy/browser, key lookups fall through to en.json. We register the full
+  // dictionary here too and fill any keys missing from game.i18n.translations.
+  const I18N_FALLBACK = {
+    en: {
+      title: "PF2E XP Budget Tool", buttonLabel: "PF2E XP Budget", partyDialogTitle: "Party Info",
+      adj: { weak: { label: "Weak", short: "W" }, normal: { label: "Normal", short: "N" }, elite: { label: "Elite", short: "E" } },
+      header: { partySize: "Size", partyLevel: "Level", threat: "Threat" },
+      progress: { currentTarget: "{current} / {target} XP" },
+      gap: { match: "On target ✓", under: "{n} short", over: "{n} over" },
+      npc: {
+        selectedUnits: "Selected units", empty: "No opposition or hazard token selected.",
+        hazardsLabel: "Hazards: ", pendingApply: "({n} pending)",
+        summary: "{npcs} creature(s)", summaryWithHazards: "{npcs} creature(s) / {hazards} hazard(s)"
+      },
+      btn: {
+        cancel: "Cancel", calculate: "Calculate XP", close: "Close", reset: "Reset preview",
+        applyN: "Apply {n} template change(s)", noChanges: "No pending changes",
+        applying: "Applying…", previewPlan: "Preview this plan"
+      },
+      notif: {
+        gmOnly: "GM-only tool",
+        needSelection: "Select at least one opposition or hazard token in the scene (PCs optional)",
+        applied: "Applied {n} template change(s)",
+        partialApplied: "Applied {applied}; failed: {names}",
+        applyFailed: "Failed to apply template"
+      },
+      plans: {
+        title: "Suggested plans", titleWithCount: "Suggested plans ({shown}/{total})",
+        done: "Target met, nothing to adjust ✓", empty: "No plans available",
+        noteFallback: "No exact plans; showing closest approximations",
+        addDesc: "Add {parts}", removeDesc: "Remove {parts}",
+        adjustDescOne: "{name} → {to}",
+        adjustDescTwo: "{a} → {ta}, {b} → {tb}",
+        adjustDescMore: "{name} → {to} +{extra} more",
+        compositeDesc: "{adjust} + {add}", previewHint: "Click row to preview"
+      },
+      card: { ops: "{n} op(s)" },
+      ref: {
+        title: "Per-creature XP reference (Table 10-2)",
+        level: "Level", vsParty: "vs party", xp: "XP", roleHeader: "Suggested role",
+        note: "Rows marked N/A are below Lv -1: PF2e has no such creatures, shown for XP-table reference only.",
+        role: {
+          n4: "Low-threat lackey", n3: "Low- or moderate-threat lackey",
+          n2: "Any lackey or standard creature", n1: "Any standard creature",
+          p0: "Any standard creature or low-threat boss",
+          p1: "Low- or moderate-threat boss", p2: "Moderate- or severe-threat boss",
+          p3: "Severe- or extreme-threat boss", p4: "Extreme-threat solo boss"
+        }
+      }
+    },
+    cn: {
+      title: "PF2E XP 预算工具", buttonLabel: "PF2E XP 预算工具", partyDialogTitle: "队伍信息",
+      adj: { weak: { label: "弱小", short: "弱" }, normal: { label: "普通", short: "普" }, elite: { label: "精英", short: "精" } },
+      header: { partySize: "人数", partyLevel: "等级", threat: "威胁" },
+      progress: { currentTarget: "{current} / {target} XP" },
+      gap: { match: "达标 ✓", under: "缺 {n}", over: "超 {n}" },
+      npc: {
+        selectedUnits: "已选单位", empty: "未选择任何敌对或陷阱单位。",
+        hazardsLabel: "陷阱：", pendingApply: "({n} 项待应用)",
+        summary: "{npcs} 怪物", summaryWithHazards: "{npcs} 怪物 / {hazards} 陷阱"
+      },
+      btn: {
+        cancel: "取消", calculate: "计算 XP", close: "关闭", reset: "重置预览",
+        applyN: "应用 {n} 项模板更改", noChanges: "无待应用更改",
+        applying: "应用中…", previewPlan: "预览此方案"
+      },
+      notif: {
+        gmOnly: "此工具仅限 GM 使用",
+        needSelection: "请至少在场景中选中一个敌对或陷阱 Token（可额外选择 PC）",
+        applied: "已应用 {n} 项模板",
+        partialApplied: "已应用 {applied} 项；失败：{names}",
+        applyFailed: "应用模板失败"
+      },
+      plans: {
+        title: "推荐方案", titleWithCount: "推荐方案 ({shown}/{total})",
+        done: "已达成目标，无需调整 ✓", empty: "无可用方案",
+        noteFallback: "无精确方案，显示最接近的近似方案",
+        addDesc: "添加 {parts}", removeDesc: "移除 {parts}",
+        adjustDescOne: "{name} → {to}",
+        adjustDescTwo: "{a} → {ta}, {b} → {tb}",
+        adjustDescMore: "{name} → {to} +{extra} 项",
+        compositeDesc: "{adjust} + {add}", previewHint: "点击行预览"
+      },
+      card: { ops: "{n} 步" },
+      ref: {
+        title: "单只怪贡献参考表 (Table 10-2)",
+        level: "等级", vsParty: "vs 队伍", xp: "XP", roleHeader: "建议角色",
+        note: "标 N/A 的等级低于 -1，PF2e 中不存在该等级的怪物，仅作 XP 数值参考。",
+        role: {
+          n4: "低威胁喽啰", n3: "低/中威胁喽啰",
+          n2: "任意喽啰或标准生物", n1: "任意标准生物",
+          p0: "任意标准生物或低威胁 boss",
+          p1: "低/中威胁 boss", p2: "中/重威胁 boss",
+          p3: "重/极端威胁 boss", p4: "极端威胁独行 boss"
+        }
+      }
+    }
+  };
+  const I18N_LANG_ALIAS = { "zh-CN": "cn", "zh-Hans": "cn", "zh": "cn" };
+
+  function fillMissingTranslations(target, source) {
+    for (const k of Object.keys(source)) {
+      const v = source[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        if (!target[k] || typeof target[k] !== "object") target[k] = {};
+        fillMissingTranslations(target[k], v);
+      } else if (target[k] === undefined) {
+        target[k] = v;
+      }
+    }
+  }
+
+  Hooks.once("i18nInit", () => {
+    const lang = (game.i18n && game.i18n.lang) || "en";
+    const key = I18N_FALLBACK[lang] ? lang : (I18N_LANG_ALIAS[lang] || "en");
+    const dict = I18N_FALLBACK[key] || I18N_FALLBACK.en;
+    if (!game.i18n.translations.PF2EXPTool) game.i18n.translations.PF2EXPTool = {};
+    fillMissingTranslations(game.i18n.translations.PF2EXPTool, dict);
+  });
+
   Hooks.once("init", () => {
     console.log(`${MODULE_ID} | init`);
   });

@@ -441,16 +441,12 @@
         <div class="xp-stat">
           <div class="xp-stat-label">${T("header.partyLevel")}</div>
           <div class="xp-stat-value">
-            Lv <input type="number" class="xp-input party-level-input" value="${state.partyLevel}" min="1">
+            <input type="number" class="xp-input party-level-input" value="${state.partyLevel}" min="1">
           </div>
         </div>
         <div class="xp-stat threat ${state.xp.rating}">
           <div class="xp-stat-label">${T("header.threat")}</div>
           <div class="xp-stat-value">${threatLabel}</div>
-        </div>
-        <div class="xp-stat">
-          <div class="xp-stat-label">${T("header.totalPerPlayer")}</div>
-          <div class="xp-stat-value">${state.xp.totalXP} / ${state.xp.xpPerPlayer}</div>
         </div>
       </div>
     `;
@@ -466,29 +462,23 @@
     const targetPct = Math.min(100, (target / max) * 100);
     const ratio = target > 0 ? current / target : 1;
     const fillCls = ratio < 0.95 ? "under" : (ratio <= 1.05 ? "match" : "over");
+    const gap = state.gap;
+    let gapHtml;
+    if (gap === 0) gapHtml = `<span class="gap-label match">${T("gap.match")}</span>`;
+    else if (gap > 0) gapHtml = `<span class="gap-label under">${T("gap.under", { n: gap })}</span>`;
+    else                gapHtml = `<span class="gap-label over">${T("gap.over",  { n: Math.abs(gap) })}</span>`;
     return `
       <div class="xp-bar-wrap">
         <div class="xp-bar-labels">
-          <span>${T("progress.currentLabel")} <strong>${current}</strong> XP</span>
-          <span>${T("progress.targetLabel")} <strong>${target}</strong> XP</span>
+          <span>${T("progress.currentTarget", { current, target })}</span>
+          ${gapHtml}
         </div>
         <div class="xp-bar">
           <div class="xp-bar-fill ${fillCls}" style="width:${currentPct}%"></div>
           <div class="xp-bar-target" style="left:${targetPct}%"></div>
-          <div class="xp-bar-text">${Math.round(ratio * 100)}%</div>
         </div>
       </div>
     `;
-  }
-
-  function renderGapBanner(state) {
-    const gap = state.gap;
-    if (gap === 0) return `<div class="gap-banner match">${T("gap.match")}</div>`;
-    if (gap > 0) {
-      return `<div class="gap-banner under">${T("gap.under", { gap, per: Math.round(gap / state.partySize) })}</div>`;
-    }
-    const abs = Math.abs(gap);
-    return `<div class="gap-banner over">${T("gap.over", { abs, per: Math.round(abs / state.partySize) })}</div>`;
   }
 
   // ---------------- render: NPC list ----------------
@@ -496,33 +486,19 @@
   function renderNpcCard(npc, idx, state) {
     const finalLevel = effectiveLevel(npc.baseLevel, npc.previewAdjustment);
     const changed = npc.previewAdjustment !== npc.currentAdjustment;
-    const adj = ADJUSTMENTS[npc.previewAdjustment];
+    const adjKey = npc.previewAdjustment;
     const npcXP = singleNpcXP(finalLevel, state.partyLevel, state.pwol);
 
-    let metaHtml;
-    if (npc.previewAdjustment === "normal") {
-      metaHtml = `<span>Lv ${finalLevel}</span><span class="meta-xp">${npcXP} XP</span>`;
-    } else {
-      metaHtml = `
-        <span class="meta-base">${T("npc.baseLevel", { lv: npc.baseLevel })}</span>
-        <span class="meta-arrow">→</span>
-        <span class="adj-text ${npc.previewAdjustment}">${adj.label} Lv ${finalLevel}</span>
-        <span class="meta-xp">${npcXP} XP</span>
-      `;
-    }
-
     const buttons = ["weak", "normal", "elite"].map(a => {
-      const active = npc.previewAdjustment === a ? ` active adj-${a}` : "";
+      const active = adjKey === a ? ` active adj-${a}` : "";
       return `<button type="button" class="adj-btn${active}" data-npc-idx="${idx}" data-adj="${a}" title="${ADJUSTMENTS[a].label}">${ADJUSTMENTS[a].short}</button>`;
     }).join("");
 
     return `
       <div class="npc-card${changed ? " changed" : ""}">
-        <div class="npc-info">
-          <div class="npc-name">${escapeHtml(npc.name)}${changed ? ' <span class="changed-dot">●</span>' : ""}</div>
-          <div class="npc-meta">${metaHtml}</div>
-        </div>
-        <div class="npc-final ${npc.previewAdjustment}">Lv ${finalLevel}</div>
+        <div class="npc-name">${escapeHtml(npc.name)}${changed ? ' <span class="changed-dot">●</span>' : ""}</div>
+        <div class="npc-level ${adjKey}">Lv ${finalLevel}</div>
+        <div class="npc-xp">${npcXP} XP</div>
         <div class="adj-toggle">${buttons}</div>
       </div>
     `;
@@ -551,229 +527,109 @@
     return `<details open><summary>${summary}</summary><div class="details-body">${npcsHtml}${hazardsHtml}</div></details>`;
   }
 
-  // ---------------- render: individual plan cards ----------------
+  // ---------------- render: plan rows (one-line each) ----------------
 
-  function planToHtml(plan, isAdd, sourceKey, sourceIdx) {
-    if (!plan) return "";
-    const actionWord = isAdd ? T("action.add") : T("action.remove");
-    const cls = isAdd ? "add" : "remove";
-    const tag = `<span class="plan-tag ${cls}">${actionWord}</span>`;
-    const parts = plan.parts.map(p => `
-      <div class="plan-line">
-        <span class="plan-count">${p.count} ×</span>
-        <span class="plan-level">Lv ${p.level}</span>
-        <span class="plan-delta">(${signed(p.delta)})</span>
-        <span class="plan-xp">${p.xp}×${p.count}=<strong>${p.subtotal}</strong></span>
-      </div>
-    `).join("");
-    const devTag = plan.deviation > 0
-      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
-      : "";
-    const actions = plan.totalCount;
-    return `
-      <div class="plan-card ${cls}" data-plan-kind="add" data-plan-source="${sourceKey || ""}" data-plan-idx="${sourceIdx != null ? sourceIdx : ""}">
-        <div class="plan-header">
-          ${tag}
-          <strong>${T("card.addHeader", { action: actionWord, sum: plan.sum })}</strong>
-          <span class="op-summary">${T("card.addOps", { count: plan.totalCount, distinct: plan.distinct, actions })}</span>
-          ${devTag}
-        </div>
-        <div class="plan-body">${parts}</div>
-      </div>
-    `;
-  }
-
-  function adjustPlanToHtml(plan, sourceKey, sourceIdx) {
-    const deltaSum = plan.sum;
-    const sumLabel = (deltaSum >= 0 ? "+" : "") + deltaSum + " XP";
-    const sumCls = deltaSum >= 0 ? "positive" : "negative";
-    const devTag = plan.deviation > 0
-      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
-      : "";
-    const lines = plan.picked.map(op => {
-      const opCls = op.deltaXP >= 0 ? "positive" : "negative";
-      const deltaSign = op.deltaXP >= 0 ? "+" : "";
-      return `
-        <div class="adjust-line">
-          <span class="adjust-name">${escapeHtml(op.npcName)}</span>
-          <span class="adjust-flow">
-            <span class="adj-text ${op.fromAdj}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
-            <span class="meta-arrow">→</span>
-            <span class="adj-text ${op.toAdj}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
-          </span>
-          <span class="adjust-delta ${opCls}">${deltaSign}${op.deltaXP} XP</span>
-        </div>
-      `;
-    }).join("");
-    return `
-      <div class="plan-card adjust" data-plan-kind="adjust" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
-        <div class="plan-header">
-          <span class="plan-tag adjust">${T("tag.adjust")}</span>
-          <strong class="${sumCls}">${sumLabel}</strong>
-          <span class="op-summary">${T("card.adjustOps", { n: plan.count })}</span>
-          ${devTag}
-          <button type="button" class="plan-preview-btn" data-preview-kind="adjust" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}">${T("btn.previewPlan")}</button>
-        </div>
-        <div class="plan-body">${lines}</div>
-      </div>
-    `;
-  }
-
-  function compositePlanToHtml(plan, sourceKey, sourceIdx, isAdd) {
-    const sumCls = plan.totalSum >= 0 ? "positive" : "negative";
-    const sumLabel = (plan.totalSum >= 0 ? "+" : "") + plan.totalSum + " XP";
-    const devTag = plan.deviation > 0
-      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
-      : "";
-    const adjustLines = plan.adjustsPicked.map(op => {
-      const opCls = op.deltaXP >= 0 ? "positive" : "negative";
-      const deltaSign = op.deltaXP >= 0 ? "+" : "";
-      return `
-        <div class="adjust-line">
-          <span class="adjust-name">${escapeHtml(op.npcName)}</span>
-          <span class="adjust-flow">
-            <span class="adj-text ${op.fromAdj}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
-            <span class="meta-arrow">→</span>
-            <span class="adj-text ${op.toAdj}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
-          </span>
-          <span class="adjust-delta ${opCls}">${deltaSign}${op.deltaXP} XP</span>
-        </div>
-      `;
-    }).join("");
-    const addAction = isAdd ? T("action.add") : T("action.remove");
-    const stepLabel = isAdd ? T("card.step2Add") : T("card.step2Remove");
-    const addLines = plan.addParts.map(p => `
-      <div class="plan-line">
-        <span class="plan-count">${p.count} ×</span>
-        <span class="plan-level">Lv ${p.level}</span>
-        <span class="plan-delta">(${signed(p.delta)})</span>
-        <span class="plan-xp">${p.xp}×${p.count}=<strong>${p.subtotal}</strong></span>
-      </div>
-    `).join("");
-    const totalActions = plan.adjustCount + plan.addCount;
-    return `
-      <div class="plan-card composite" data-plan-kind="composite" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
-        <div class="plan-header">
-          <span class="plan-tag composite">${T("tag.composite")}</span>
-          <strong class="${sumCls}">${sumLabel}</strong>
-          <span class="op-summary">${T("card.compOps", { adjust: plan.adjustCount, action: addAction, addCount: plan.addCount, total: totalActions })}</span>
-          ${devTag}
-          <button type="button" class="plan-preview-btn" data-preview-kind="composite" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}">${T("btn.previewAdjustOnly")}</button>
-        </div>
-        <div class="plan-body">
-          <div class="step-label">${T("card.step1Adjust")}</div>
-          ${adjustLines}
-          <div class="step-label">${stepLabel}</div>
-          ${addLines}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderPlanItem(item, state) {
-    if (item.kind === "adjust") return adjustPlanToHtml(item.plan, item.sourceKey, item.sourceIdx);
-    if (item.kind === "add") return planToHtml(item.plan, state.gap > 0, item.sourceKey, item.sourceIdx);
-    if (item.kind === "composite") return compositePlanToHtml(item.plan, item.sourceKey, item.sourceIdx, state.gap > 0);
+  // Renders a single-line description of a plan, free of HTML.
+  function planDesc(item, state) {
+    const kind = item.kind;
+    const plan = item.plan;
+    if (kind === "add") {
+      const parts = plan.parts.map(p => `${p.count}× Lv ${p.level}`).join(" + ");
+      return T(state.gap > 0 ? "plans.addDesc" : "plans.removeDesc", { parts });
+    }
+    if (kind === "adjust") return adjustDesc(plan.picked);
+    if (kind === "composite") {
+      const adj = adjustDesc(plan.adjustsPicked);
+      const adds = plan.addParts.map(p => `${p.count}× Lv ${p.level}`).join(" + ");
+      const add = T(state.gap > 0 ? "plans.addDesc" : "plans.removeDesc", { parts: adds });
+      return T("plans.compositeDesc", { adjust: adj, add });
+    }
     return "";
   }
 
-  // ---------------- render: plan area (by-actions / by-type) ----------------
+  function adjustDesc(picked) {
+    if (!picked || picked.length === 0) return "";
+    const fmt = (op) => ({ name: op.npcName, to: ADJUSTMENTS[op.toAdj].label });
+    if (picked.length === 1) return T("plans.adjustDescOne", fmt(picked[0]));
+    if (picked.length === 2) {
+      return T("plans.adjustDescTwo", {
+        a: picked[0].npcName, ta: ADJUSTMENTS[picked[0].toAdj].label,
+        b: picked[1].npcName, tb: ADJUSTMENTS[picked[1].toAdj].label
+      });
+    }
+    return T("plans.adjustDescMore", { ...fmt(picked[0]), extra: picked.length - 1 });
+  }
 
-  function renderPlanControls(state) {
-    const byActionsActive = state.viewMode === "by-actions" ? " active" : "";
-    const byTypeActive = state.viewMode === "by-type" ? " active" : "";
-    const checked = state.showNear ? "checked" : "";
+  function planSumSigned(item, state) {
+    const kind = item.kind;
+    if (kind === "adjust") return item.plan.sum;
+    if (kind === "composite") return item.plan.totalSum;
+    return state.gap > 0 ? item.plan.sum : -item.plan.sum;
+  }
+
+  function planIconHtml(item, state) {
+    const kind = item.kind;
+    if (kind === "adjust") return '<i class="fas fa-sliders"></i>';
+    if (kind === "composite") return '<i class="fas fa-shuffle"></i>';
+    return state.gap > 0 ? '<i class="fas fa-plus"></i>' : '<i class="fas fa-minus"></i>';
+  }
+
+  function renderPlanItem(item, state) {
+    const kind = item.kind;
+    const plan = item.plan;
+    const sum = planSumSigned(item, state);
+    const sumCls = sum >= 0 ? "positive" : "negative";
+    const sumLabel = (sum >= 0 ? "+" : "") + sum;
+    const ops = planActions(item);
+    const desc = escapeHtml(planDesc(item, state));
+    const clickable = (kind === "adjust" || kind === "composite");
+    const dev = plan.deviation > 0
+      ? ` <span class="plan-deviation">≈${plan.deviation}</span>`
+      : "";
+    const titleAttr = clickable ? ` title="${T("plans.previewHint")}"` : "";
+    const data = `data-plan-kind="${kind}" data-plan-source="${item.sourceKey || ""}" data-plan-idx="${item.sourceIdx != null ? item.sourceIdx : ""}"`;
     return `
-      <div class="plan-controls">
-        <span class="control-label">${T("view.orderLabel")}</span>
-        <div class="view-tabs">
-          <button type="button" class="view-tab${byActionsActive}" data-view="by-actions">${T("view.byActions")}</button>
-          <button type="button" class="view-tab${byTypeActive}" data-view="by-type">${T("view.byType")}</button>
-        </div>
-        <label class="show-near-label" title="${T("view.showNearTip")}">
-          <input type="checkbox" class="show-near-cb" ${checked}> ${T("view.showNear")}
-        </label>
+      <div class="plan-row ${kind}${clickable ? " clickable" : ""}" ${data}${titleAttr}>
+        <span class="plan-icon">${planIconHtml(item, state)}</span>
+        <span class="plan-desc">${desc}${dev}</span>
+        <span class="plan-sum ${sumCls}">${sumLabel}</span>
+        <span class="plan-ops">${T("card.ops", { n: ops })}</span>
       </div>
     `;
   }
 
-  function renderUnifiedPlans(state) {
-    const includeNear = state.showNear;
-    let all = getAllPlans(state, includeNear);
-    let exactCount = all.filter(i => i.deviation === 0).length;
-    if (exactCount === 0 && !includeNear) {
-      all = getAllPlans(state, true);
-      exactCount = 0;
-    }
-    if (all.length === 0) return `<p class="empty-msg">${T("plans.emptyAny")}</p>`;
-    const top = all.slice(0, 12);
-    const note = (exactCount === 0 && !includeNear)
-      ? `<div class="plan-note">${T("plans.noteUnifiedAuto")}</div>`
-      : `<div class="plan-note">${T("plans.noteUnifiedAsc", { total: all.length, top: top.length })}</div>`;
-    return note + top.map(item => renderPlanItem(item, state)).join("");
-  }
-
-  function renderTypedSection(state, kind, sectionTitle) {
-    const isAdd = state.gap > 0;
-    const includeNear = state.showNear;
-    const planList = state[kind === "adjust" ? "adjustPlans"
-                          : kind === "add" ? "addPlans"
-                          : "compositePlans"];
-    let exact = planList.exact || [];
-    let near = planList.near || [];
-    let content = "";
-    if (exact.length === 0 && near.length === 0) {
-      return `<details><summary>${sectionTitle}</summary><div class="details-body"><p class="empty-msg">${T("plans.emptyAny")}</p></div></details>`;
-    }
-    if (exact.length > 0) {
-      content += `<div class="plan-note">${T("plans.noteExactCount", { n: exact.length })}</div>`;
-      content += exact.map((p, i) => {
-        const item = { kind, plan: p, sourceKey: "exact", sourceIdx: i };
-        item.actions = planActions(item);
-        return renderPlanItem(item, state);
-      }).join("");
-    }
-    if (near.length > 0 && (includeNear || exact.length === 0)) {
-      const heading = exact.length === 0
-        ? T("plans.noteNearOnly")
-        : T("plans.noteNearAltShort");
-      content += `<div class="plan-note">${heading}</div>`;
-      content += near.map((p, i) => {
-        const item = { kind, plan: p, sourceKey: "near", sourceIdx: i };
-        item.actions = planActions(item);
-        return renderPlanItem(item, state);
-      }).join("");
-    }
-    return `<details open><summary>${sectionTitle}</summary><div class="details-body">${content}</div></details>`;
-  }
-
-  function renderTypedPlans(state) {
-    const isAdd = state.gap > 0;
-    const addAction = isAdd ? T("action.add") : T("action.remove");
-    return [
-      renderTypedSection(state, "adjust", T("plans.sectionAdjust")),
-      renderTypedSection(state, "add", T("plans.sectionAdd", { action: addAction })),
-      renderTypedSection(state, "composite", T("plans.sectionComposite", { action: addAction }))
-    ].join("");
-  }
+  // ---------------- render: plans section (auto fallback, top N, by ops) ----------------
 
   function renderPlansSection(state) {
     if (state.gap === 0) {
-      return `<details open><summary>${T("plans.titleDefault")}</summary><div class="details-body"><p class="empty-msg">${T("plans.done")}</p></div></details>`;
+      return `<details open><summary>${T("plans.title")}</summary><div class="details-body"><p class="empty-msg">${T("plans.done")}</p></div></details>`;
     }
-    const diffLabel = state.gap > 0
-      ? T("plans.diffUnder", { abs: Math.abs(state.gap) })
-      : T("plans.diffOver", { abs: Math.abs(state.gap) });
-    const inner = state.viewMode === "by-type" ? renderTypedPlans(state) : renderUnifiedPlans(state);
-    const wrapped = state.viewMode === "by-type"
-      ? inner
-      : `<details open><summary>${T("plans.titleByActions")}</summary><div class="details-body">${inner}</div></details>`;
+    const MAX_SHOWN = 8;
+    const exactAll = getAllPlans(state, false);
+    let all = exactAll;
+    let usedFallback = false;
+    if (exactAll.length < 3) {
+      all = getAllPlans(state, true);
+      usedFallback = exactAll.length === 0;
+    }
+    if (all.length === 0) {
+      return `<details open><summary>${T("plans.title")}</summary><div class="details-body"><p class="empty-msg">${T("plans.empty")}</p></div></details>`;
+    }
+    const top = all.slice(0, MAX_SHOWN);
+    const summary = all.length > top.length
+      ? T("plans.titleWithCount", { shown: top.length, total: all.length })
+      : T("plans.title");
+    const fallbackNote = usedFallback
+      ? `<div class="plan-note">${T("plans.noteFallback")}</div>`
+      : "";
     return `
-      <div class="plans-section">
-        ${renderPlanControls(state)}
-        ${wrapped}
-        <div class="plan-diffline">${T("plans.diffLine", { label: diffLabel })}</div>
-      </div>
+      <details open>
+        <summary>${summary}</summary>
+        <div class="details-body">
+          ${fallbackNote}
+          ${top.map(item => renderPlanItem(item, state)).join("")}
+        </div>
+      </details>
     `;
   }
 
@@ -838,7 +694,6 @@
       <div class="xp-tool">
         ${renderHeader(state)}
         ${renderProgressBar(state)}
-        ${renderGapBanner(state)}
         ${renderNpcSection(state)}
         ${renderPlansSection(state)}
         ${renderReferenceSection(state)}
@@ -889,12 +744,12 @@
       });
     });
 
-    rootEl.querySelectorAll(".plan-preview-btn").forEach(btn => {
-      btn.addEventListener("click", e => {
+    rootEl.querySelectorAll(".plan-row.clickable").forEach(row => {
+      row.addEventListener("click", e => {
         e.preventDefault();
-        const kind = btn.dataset.previewKind;
-        const sourceKey = btn.dataset.previewSource;
-        const idx = Number(btn.dataset.previewIdx);
+        const kind = row.dataset.planKind;
+        const sourceKey = row.dataset.planSource;
+        const idx = Number(row.dataset.planIdx);
         let plan;
         if (kind === "adjust") plan = state.adjustPlans[sourceKey] && state.adjustPlans[sourceKey][idx];
         else if (kind === "composite") plan = state.compositePlans[sourceKey] && state.compositePlans[sourceKey][idx];
@@ -906,27 +761,6 @@
         refresh();
       });
     });
-
-    rootEl.querySelectorAll(".view-tab").forEach(btn => {
-      btn.addEventListener("click", e => {
-        e.preventDefault();
-        const mode = btn.dataset.view;
-        if (mode && mode !== state.viewMode) {
-          state.viewMode = mode;
-          try { localStorage.setItem("pf2eXpTool.viewMode", mode); } catch (_) {}
-          refresh();
-        }
-      });
-    });
-
-    const showNearCb = rootEl.querySelector(".show-near-cb");
-    if (showNearCb) {
-      showNearCb.addEventListener("change", e => {
-        state.showNear = !!e.target.checked;
-        try { localStorage.setItem("pf2eXpTool.showNear", state.showNear ? "1" : "0"); } catch (_) {}
-        refresh();
-      });
-    }
 
     const sizeInput = rootEl.querySelector(".party-size-input");
     if (sizeInput) {
@@ -1056,28 +890,10 @@
     }).map(t => t.actor);
   }
 
-  function getInitialPrefs() {
-    let viewMode = "by-actions";
-    let showNear = false;
-    try {
-      const v = localStorage.getItem("pf2eXpTool.viewMode");
-      if (v === "by-type" || v === "by-actions") viewMode = v;
-      const sn = localStorage.getItem("pf2eXpTool.showNear");
-      if (sn === "1") showNear = true;
-    } catch (_) {}
-    return { viewMode, showNear };
-  }
-
   function openTool(partyLevel, partySize, npcs, hazards, hazardActors) {
     const pwol = !!(game.pf2e && game.pf2e.settings && game.pf2e.settings.variants &&
       game.pf2e.settings.variants.pwol && game.pf2e.settings.variants.pwol.enabled);
-    const prefs = getInitialPrefs();
-    showXPTool({
-      partyLevel, partySize,
-      npcs, hazards, hazardActors, pwol,
-      viewMode: prefs.viewMode,
-      showNear: prefs.showNear
-    });
+    showXPTool({ partyLevel, partySize, npcs, hazards, hazardActors, pwol });
   }
 
   function askPartyAndOpen(npcs, hazards, hazardActors) {

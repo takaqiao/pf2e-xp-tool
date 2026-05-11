@@ -1,5 +1,5 @@
 /* PF2E XP Budget Tool — native PF2e / Foundry styling.
-   No custom palette: relies on system + core CSS variables with safe fallbacks. */
+   Information density tightened: single-line NPC cards, single-line plan rows. */
 
 .xp-tool { font-size: var(--font-size-13, 0.8125rem); line-height: 1.4; }
 
@@ -12,7 +12,7 @@
   border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
 }
 .xp-tool details > summary:hover { color: var(--color-text-accent, var(--color-warm-1, #ee9b3a)); }
-.xp-tool .details-body { padding: 0.35rem 0.25rem 0.2rem; }
+.xp-tool .details-body { padding: 0.25rem 0.2rem; }
 .xp-tool .empty-msg {
   color: var(--color-text-subtle, var(--color-dark-4));
   text-align: center;
@@ -20,16 +20,16 @@
   font-style: italic;
 }
 
-/* ---------- header strip (party size / level / threat / xp) ---------- */
+/* ---------- header strip (party size / level / threat) ---------- */
 .xp-tool .xp-header {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: auto auto 1fr;
   gap: 0.35rem;
   margin-bottom: 0.4rem;
 }
 .xp-tool .xp-stat {
   text-align: center;
-  padding: 0.2rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
   background: rgba(0, 0, 0, 0.04);
 }
@@ -47,7 +47,7 @@
   font: inherit;
 }
 
-/* threat rating — same colors as PF2e combat tracker (#combat .metrics .threat) */
+/* threat — same colors as PF2e combat tracker */
 .xp-tool .xp-stat.threat .xp-stat-value {
   text-shadow: 1px 1px 2px var(--color-shadow-dark, #000);
 }
@@ -57,18 +57,23 @@
 .xp-tool .xp-stat.threat.severe   .xp-stat-value { color: orange; }
 .xp-tool .xp-stat.threat.extreme  .xp-stat-value { color: red;    }
 
-/* ---------- progress bar ---------- */
-.xp-tool .xp-bar-wrap { margin: 0.4rem 0; }
+/* ---------- progress bar (gap label inline) ---------- */
+.xp-tool .xp-bar-wrap { margin: 0.3rem 0 0.4rem; }
 .xp-tool .xp-bar-labels {
   display: flex;
   justify-content: space-between;
-  font-size: var(--font-size-11, 0.6875rem);
+  align-items: baseline;
+  font-size: var(--font-size-12, 0.75rem);
   color: var(--color-text-secondary, var(--color-dark-3));
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
+.xp-tool .gap-label { font-weight: bold; }
+.xp-tool .gap-label.match { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .gap-label.under { color: var(--color-level-warning,           #ee9b3a); }
+.xp-tool .gap-label.over  { color: var(--color-pf-primary,              #5e0000); }
 .xp-tool .xp-bar {
   position: relative;
-  height: 16px;
+  height: 12px;
   border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
   background: rgba(0, 0, 0, 0.04);
 }
@@ -76,11 +81,10 @@
   position: absolute;
   left: 0; top: 0; bottom: 0;
   transition: width 0.2s, background-color 0.2s;
-  background: var(--color-pf-alternate, #786452);
 }
-.xp-tool .xp-bar-fill.under { background: var(--color-level-warning, #ee9b3a); }
+.xp-tool .xp-bar-fill.under { background: var(--color-level-warning,           #ee9b3a); }
 .xp-tool .xp-bar-fill.match { background: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .xp-bar-fill.over  { background: var(--color-pf-primary, #5e0000); }
+.xp-tool .xp-bar-fill.over  { background: var(--color-pf-primary,              #5e0000); }
 .xp-tool .xp-bar-target {
   position: absolute;
   top: -2px; bottom: -2px;
@@ -88,68 +92,38 @@
   background: var(--color-text-primary, var(--color-dark-2));
   z-index: 2;
 }
-.xp-tool .xp-bar-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-11, 0.6875rem);
-  font-weight: bold;
-  color: var(--color-light-1, #f7f3e8);
-  text-shadow: 1px 1px 2px var(--color-shadow-dark, #000);
-}
 
-/* ---------- gap banner ---------- */
-.xp-tool .gap-banner {
-  margin: 0.35rem 0;
-  padding: 0.3rem 0.5rem;
-  text-align: center;
-  font-weight: bold;
-  border-left: 3px solid var(--color-pf-alternate, #786452);
-  background: rgba(0, 0, 0, 0.04);
-}
-.xp-tool .gap-banner.match { border-left-color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .gap-banner.under { border-left-color: var(--color-level-warning, #ee9b3a); }
-.xp-tool .gap-banner.over  { border-left-color: var(--color-pf-primary, #5e0000); }
-
-/* ---------- NPC list ---------- */
+/* ---------- NPC list — single line per row ---------- */
 .xp-tool .npc-card {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 0.4rem;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.5rem;
   align-items: center;
-  padding: 0.15rem 0.3rem;
+  padding: 0.1rem 0.3rem;
   border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
 }
-.xp-tool .npc-card.changed { background: rgba(238, 155, 58, 0.10); }
-.xp-tool .npc-info { min-width: 0; }
+.xp-tool .npc-card.changed { background: rgba(238, 155, 58, 0.08); }
 .xp-tool .npc-name {
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.xp-tool .npc-meta {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-  font-size: var(--font-size-11, 0.6875rem);
-  color: var(--color-text-secondary, var(--color-dark-3));
-  flex-wrap: wrap;
-}
-.xp-tool .meta-base { color: var(--color-text-subtle, var(--color-dark-4)); }
-.xp-tool .meta-arrow { color: var(--color-text-subtle, var(--color-dark-4)); }
-.xp-tool .meta-xp { margin-left: auto; font-weight: bold; }
-.xp-tool .npc-final {
-  padding: 0 0.3rem;
+.xp-tool .npc-level {
   font-weight: bold;
-  min-width: 3em;
-  text-align: center;
-  border: 1px solid currentColor;
   font-size: var(--font-size-12, 0.75rem);
+  white-space: nowrap;
 }
-.xp-tool .changed-dot { color: var(--color-warm-2, #c9593f); margin-left: 0.2rem; }
+.xp-tool .npc-xp {
+  font-family: var(--font-monospace, monospace);
+  color: var(--color-text-secondary, var(--color-dark-3));
+  font-size: var(--font-size-12, 0.75rem);
+  white-space: nowrap;
+}
+.xp-tool .changed-dot {
+  color: var(--color-warm-2, #c9593f);
+  margin-left: 0.2rem;
+}
 .xp-tool .pending-tag {
   font-weight: normal;
   font-size: var(--font-size-11, 0.6875rem);
@@ -157,22 +131,21 @@
   margin-left: 0.3rem;
 }
 
-/* shared elite/weak coloring (text + npc-final + adj button active) */
+/* elite/weak text + npc-level coloring */
 .xp-tool .adj-text.weak,
-.xp-tool .npc-final.weak    { color: var(--color-pf-text-adjusted-lower, #cc3311); }
+.xp-tool .npc-level.weak   { color: var(--color-pf-text-adjusted-lower,  #cc3311); }
 .xp-tool .adj-text.normal,
-.xp-tool .npc-final.normal  { color: var(--color-text-secondary, var(--color-dark-3)); }
+.xp-tool .npc-level.normal { color: var(--color-text-primary); }
 .xp-tool .adj-text.elite,
-.xp-tool .npc-final.elite   { color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .adj-text { font-weight: bold; }
+.xp-tool .npc-level.elite  { color: var(--color-pf-text-adjusted-higher, #009988); }
 
-/* ---------- adjustment toggle ---------- */
+/* ---------- adjustment toggle (W / N / E) ---------- */
 .xp-tool .adj-toggle {
   display: inline-flex;
   border: 1px solid var(--color-border-light-tertiary, #7a7971);
 }
 .xp-tool .adj-btn {
-  padding: 0.1rem 0.55rem;
+  padding: 0 0.5rem;
   margin: 0;
   font-size: var(--font-size-11, 0.6875rem);
   background: transparent;
@@ -180,7 +153,7 @@
   border-radius: 0;
   cursor: pointer;
   color: var(--color-text-secondary, var(--color-dark-3));
-  line-height: 1.4;
+  line-height: 1.5;
   box-shadow: none;
 }
 .xp-tool .adj-btn + .adj-btn {
@@ -199,131 +172,63 @@
 .xp-tool .hazard-list {
   font-size: var(--font-size-12, 0.75rem);
   color: var(--color-text-secondary, var(--color-dark-3));
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem 0.3rem;
   margin: 0.3rem 0 0.1rem;
   border-left: 2px solid var(--color-border-light-tertiary, #7a7971);
 }
-.xp-tool .hazard-list strong { margin-right: 0.4rem; }
+.xp-tool .hazard-list strong { margin-right: 0.3rem; }
 .xp-tool .hazard-list span { margin-right: 0.5rem; }
 
-/* ---------- plan cards ---------- */
-.xp-tool .plan-card {
-  margin: 0.3rem 0;
-  padding: 0.3rem 0.45rem;
-  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
-  border-left-width: 3px;
-}
-.xp-tool .plan-card.add       { border-left-color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .plan-card.remove    { border-left-color: var(--color-level-warning,           #ee9b3a); }
-.xp-tool .plan-card.adjust    { border-left-color: var(--color-pf-secondary,            #171f69); }
-.xp-tool .plan-card.composite { border-left-color: var(--color-pf-alternate-dark,       #443730); }
-
-.xp-tool .plan-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: bold;
-  margin-bottom: 0.15rem;
-}
-.xp-tool .plan-header .op-summary,
-.xp-tool .plan-note,
-.xp-tool .plan-diffline {
+/* ---------- plan rows — one line per plan ---------- */
+.xp-tool .plan-note {
   font-size: var(--font-size-11, 0.6875rem);
   color: var(--color-text-subtle, var(--color-dark-4));
-  font-weight: normal;
+  font-style: italic;
+  margin: 0.1rem 0 0.25rem;
 }
-.xp-tool .plan-diffline { text-align: right; margin-top: 0.25rem; }
-.xp-tool .plan-note { margin: 0.1rem 0 0.3rem; }
-.xp-tool .deviation {
-  font-size: var(--font-size-11, 0.6875rem);
-  color: var(--color-level-warning, #ee9b3a);
-  font-weight: normal;
-}
-
-.xp-tool .plan-line {
+.xp-tool .plan-row {
   display: grid;
-  grid-template-columns: 2.5em auto auto 1fr;
-  gap: 0.4rem;
-  align-items: center;
-  padding: 0.05rem 0;
-  font-size: var(--font-size-12, 0.75rem);
-}
-.xp-tool .plan-count { font-weight: bold; }
-.xp-tool .plan-level {
-  padding: 0 0.3rem;
-  border: 1px solid var(--color-border-light-tertiary, #7a7971);
-  text-align: center;
-}
-.xp-tool .plan-delta {
-  color: var(--color-text-subtle, var(--color-dark-4));
-  font-size: var(--font-size-10, 0.625rem);
-}
-.xp-tool .plan-xp {
-  font-family: var(--font-monospace, monospace);
-  text-align: right;
-  color: var(--color-text-secondary, var(--color-dark-3));
-}
-.xp-tool .step-label {
-  font-size: var(--font-size-10, 0.625rem);
-  color: var(--color-text-subtle, var(--color-dark-4));
-  margin: 0.25rem 0 0.05rem;
-}
-
-.xp-tool .adjust-line {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1.2em 1fr auto auto;
   gap: 0.5rem;
   align-items: center;
+  padding: 0.1rem 0.3rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   font-size: var(--font-size-12, 0.75rem);
-  padding: 0.05rem 0;
 }
-.xp-tool .adjust-name {
-  font-weight: bold;
+.xp-tool .plan-row:last-child { border-bottom: 0; }
+.xp-tool .plan-row.clickable { cursor: pointer; }
+.xp-tool .plan-row.clickable:hover { background: rgba(0, 0, 0, 0.06); }
+.xp-tool .plan-icon { text-align: center; color: var(--color-text-subtle, var(--color-dark-4)); }
+.xp-tool .plan-desc {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
-.xp-tool .adjust-flow {
-  font-size: var(--font-size-11, 0.6875rem);
-  white-space: nowrap;
-}
-.xp-tool .adjust-delta {
+.xp-tool .plan-sum {
   font-family: var(--font-monospace, monospace);
   font-weight: bold;
-  min-width: 5em;
+  white-space: nowrap;
+  text-align: right;
+  min-width: 4.5em;
+}
+.xp-tool .plan-sum.positive { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .plan-sum.negative { color: var(--color-level-warning,           #ee9b3a); }
+.xp-tool .plan-ops {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+  white-space: nowrap;
+  min-width: 3em;
   text-align: right;
 }
-.xp-tool .positive { color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .negative { color: var(--color-level-warning, #ee9b3a); }
-.xp-tool .adjust-delta.positive { color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .adjust-delta.negative { color: var(--color-level-warning, #ee9b3a); }
-
-/* ---------- plan tag (inline pill) ---------- */
-.xp-tool .plan-tag {
-  display: inline-block;
-  padding: 0 0.35rem;
+.xp-tool .plan-deviation {
   font-size: var(--font-size-10, 0.625rem);
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: 1px solid currentColor;
-  line-height: 1.5;
-}
-.xp-tool .plan-tag.adjust    { color: var(--color-pf-secondary,            #171f69); }
-.xp-tool .plan-tag.add       { color: var(--color-pf-text-adjusted-higher, #009988); }
-.xp-tool .plan-tag.remove    { color: var(--color-level-warning,           #ee9b3a); }
-.xp-tool .plan-tag.composite { color: var(--color-pf-alternate-dark,       #443730); }
-
-/* preview-only inline button inside plan header */
-.xp-tool .plan-preview-btn {
-  margin-left: auto;
-  padding: 0.05rem 0.5rem;
-  font-size: var(--font-size-11, 0.6875rem);
-  line-height: 1.4;
+  color: var(--color-level-warning, #ee9b3a);
+  margin-left: 0.3rem;
+  font-style: italic;
 }
 
-/* ---------- reference table (PF2e Table 10-2) ---------- */
+/* ---------- reference table (Table 10-2) ---------- */
 .xp-tool .ref-table {
   width: 100%;
   border-collapse: collapse;
@@ -331,7 +236,7 @@
 }
 .xp-tool .ref-table th,
 .xp-tool .ref-table td {
-  padding: 0.15rem 0.4rem;
+  padding: 0.12rem 0.4rem;
   text-align: center;
   border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
 }
@@ -361,52 +266,6 @@
   margin-top: 0.3rem;
 }
 
-/* ---------- view tabs + plan controls ---------- */
-.xp-tool .plan-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 0.2rem 0.4rem;
-  margin: 0.3rem 0;
-  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
-}
-.xp-tool .plan-controls .control-label {
-  font-size: var(--font-size-11, 0.6875rem);
-  color: var(--color-text-subtle, var(--color-dark-4));
-}
-.xp-tool .view-tabs {
-  display: inline-flex;
-  border: 1px solid var(--color-border-light-tertiary, #7a7971);
-}
-.xp-tool .view-tab {
-  padding: 0.1rem 0.6rem;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  font-size: var(--font-size-12, 0.75rem);
-  cursor: pointer;
-  color: var(--color-text-secondary, var(--color-dark-3));
-  line-height: 1.4;
-  box-shadow: none;
-}
-.xp-tool .view-tab + .view-tab {
-  border-left: 1px solid var(--color-border-light-tertiary, #7a7971);
-}
-.xp-tool .view-tab.active {
-  background: var(--color-pf-secondary, #171f69);
-  color: #fff;
-  font-weight: bold;
-}
-.xp-tool .show-near-label {
-  font-size: var(--font-size-12, 0.75rem);
-  cursor: pointer;
-  user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
 /* ---------- bottom action row ---------- */
 .xp-tool .btn-row {
   display: flex;
@@ -417,6 +276,6 @@
 }
 .xp-tool .btn-row .spacer { flex: 1; }
 
-/* ---------- sidebar inject button: defer to FVTT default button look ---------- */
+/* ---------- sidebar inject button ---------- */
 .pf2e-xp-tool-btn { margin: 0.25rem 0; }
 .pf2e-xp-tool-btn i { margin-right: 0.25rem; }

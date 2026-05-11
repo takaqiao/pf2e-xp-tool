@@ -25,30 +25,16 @@
     return baseLevel + levelDelta(baseLevel, adj);
   }
 
-  const ADJ_META = {
-    weak:   { color: "#2980b9" },
-    normal: { color: "#7f8c8d" },
-    elite:  { color: "#c0392b" }
-  };
+  // Adjustment keys recognized by PF2e (system.attributes.adjustment).
+  // Display label/short come from i18n; visual color is owned by CSS (.adj-text.{key}).
+  const ADJ_KEYS = ["weak", "normal", "elite"];
   const ADJUSTMENTS = new Proxy({}, {
     get(_, key) {
-      if (typeof key !== "string" || !ADJ_META[key]) return undefined;
-      return {
-        color: ADJ_META[key].color,
-        label: T(`adj.${key}.label`),
-        short: T(`adj.${key}.short`)
-      };
+      if (typeof key !== "string" || !ADJ_KEYS.includes(key)) return undefined;
+      return { label: T(`adj.${key}.label`), short: T(`adj.${key}.short`) };
     },
-    has(_, key) { return typeof key === "string" && key in ADJ_META; }
+    has(_, key) { return typeof key === "string" && ADJ_KEYS.includes(key); }
   });
-
-  const THREAT_COLORS = {
-    trivial:  "#16a085",
-    low:      "#27ae60",
-    moderate: "#f39c12",
-    severe:   "#e67e22",
-    extreme:  "#c0392b"
-  };
 
   // ---------------- helpers ----------------
 
@@ -98,8 +84,6 @@
     }
     return eff;
   }
-
-  function getThreatColor(rating) { return THREAT_COLORS[rating] || "#7f8c8d"; }
 
   // ---------------- XP math ----------------
 
@@ -446,24 +430,23 @@
 
   function renderHeader(state) {
     const threatLabel = L("PF2E.Encounter.Budget.Threats." + state.xp.rating);
-    const threatColor = getThreatColor(state.xp.rating);
     return `
       <div class="xp-header">
         <div class="xp-stat">
           <div class="xp-stat-label">${T("header.partySize")}</div>
           <div class="xp-stat-value">
-            <input type="number" class="xp-input party-size-input" value="${state.partySize}" min="1" step="0.5" style="width:4em">
+            <input type="number" class="xp-input party-size-input" value="${state.partySize}" min="1" step="0.5">
           </div>
         </div>
         <div class="xp-stat">
           <div class="xp-stat-label">${T("header.partyLevel")}</div>
           <div class="xp-stat-value">
-            Lv <input type="number" class="xp-input party-level-input" value="${state.partyLevel}" min="1" style="width:3em">
+            Lv <input type="number" class="xp-input party-level-input" value="${state.partyLevel}" min="1">
           </div>
         </div>
-        <div class="xp-stat" style="background:${threatColor}22;">
-          <div class="xp-stat-label" style="color:${threatColor}cc">${T("header.threat")}</div>
-          <div class="xp-stat-value" style="color:${threatColor}">${threatLabel}</div>
+        <div class="xp-stat threat ${state.xp.rating}">
+          <div class="xp-stat-label">${T("header.threat")}</div>
+          <div class="xp-stat-value">${threatLabel}</div>
         </div>
         <div class="xp-stat">
           <div class="xp-stat-label">${T("header.totalPerPlayer")}</div>
@@ -482,10 +465,7 @@
     const currentPct = Math.min(100, (current / max) * 100);
     const targetPct = Math.min(100, (target / max) * 100);
     const ratio = target > 0 ? current / target : 1;
-    let fillColor;
-    if (ratio < 0.95) fillColor = "#f39c12";
-    else if (ratio <= 1.05) fillColor = "#27ae60";
-    else fillColor = "#e74c3c";
+    const fillCls = ratio < 0.95 ? "under" : (ratio <= 1.05 ? "match" : "over");
     return `
       <div class="xp-bar-wrap">
         <div class="xp-bar-labels">
@@ -493,7 +473,7 @@
           <span>${T("progress.targetLabel")} <strong>${target}</strong> XP</span>
         </div>
         <div class="xp-bar">
-          <div class="xp-bar-fill" style="width:${currentPct}%; background:${fillColor}"></div>
+          <div class="xp-bar-fill ${fillCls}" style="width:${currentPct}%"></div>
           <div class="xp-bar-target" style="left:${targetPct}%"></div>
           <div class="xp-bar-text">${Math.round(ratio * 100)}%</div>
         </div>
@@ -524,9 +504,9 @@
       metaHtml = `<span>Lv ${finalLevel}</span><span class="meta-xp">${npcXP} XP</span>`;
     } else {
       metaHtml = `
-        <span style="opacity:0.7">${T("npc.baseLevel", { lv: npc.baseLevel })}</span>
+        <span class="meta-base">${T("npc.baseLevel", { lv: npc.baseLevel })}</span>
         <span class="meta-arrow">→</span>
-        <span style="color:${adj.color};font-weight:600">${adj.label} Lv ${finalLevel}</span>
+        <span class="adj-text ${npc.previewAdjustment}">${adj.label} Lv ${finalLevel}</span>
         <span class="meta-xp">${npcXP} XP</span>
       `;
     }
@@ -539,10 +519,10 @@
     return `
       <div class="npc-card${changed ? " changed" : ""}">
         <div class="npc-info">
-          <div class="npc-name">${escapeHtml(npc.name)}${changed ? ' <span style="color:#f39c12">●</span>' : ""}</div>
+          <div class="npc-name">${escapeHtml(npc.name)}${changed ? ' <span class="changed-dot">●</span>' : ""}</div>
           <div class="npc-meta">${metaHtml}</div>
         </div>
-        <div class="npc-final" style="background:${adj.color}33; color:${adj.color}">Lv ${finalLevel}</div>
+        <div class="npc-final ${npc.previewAdjustment}">Lv ${finalLevel}</div>
         <div class="adj-toggle">${buttons}</div>
       </div>
     `;
@@ -557,12 +537,12 @@
     let hazardsHtml = "";
     if (state.hazards.length > 0) {
       hazardsHtml = `<div class="hazard-list"><strong>${T("npc.hazardsLabel")}</strong>${
-        state.hazards.map(h => `<span style="margin-right:8px">${escapeHtml(h.name)} Lv ${h.level}</span>`).join("")
+        state.hazards.map(h => `<span>${escapeHtml(h.name)} Lv ${h.level}</span>`).join("")
       }</div>`;
     }
     const changedCount = state.npcs.filter(n => n.previewAdjustment !== n.currentAdjustment).length;
     const summaryExtra = changedCount > 0
-      ? ` <span style="color:#f39c12;font-weight:normal;font-size:11px">${T("npc.pendingApply", { n: changedCount })}</span>`
+      ? ` <span class="pending-tag">${T("npc.pendingApply", { n: changedCount })}</span>`
       : "";
     const summaryBody = state.hazards.length > 0
       ? T("npc.summaryWithHazards", { npcs: state.npcs.length, hazards: state.hazards.length })
@@ -587,7 +567,7 @@
       </div>
     `).join("");
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
+      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const actions = plan.totalCount;
     return `
@@ -595,7 +575,7 @@
         <div class="plan-header">
           ${tag}
           <strong>${T("card.addHeader", { action: actionWord, sum: plan.sum })}</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.addOps", { count: plan.totalCount, distinct: plan.distinct, actions })}</span>
+          <span class="op-summary">${T("card.addOps", { count: plan.totalCount, distinct: plan.distinct, actions })}</span>
           ${devTag}
         </div>
         <div class="plan-body">${parts}</div>
@@ -606,23 +586,22 @@
   function adjustPlanToHtml(plan, sourceKey, sourceIdx) {
     const deltaSum = plan.sum;
     const sumLabel = (deltaSum >= 0 ? "+" : "") + deltaSum + " XP";
-    const sumColor = deltaSum >= 0 ? "#27ae60" : "#e67e22";
+    const sumCls = deltaSum >= 0 ? "positive" : "negative";
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
+      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const lines = plan.picked.map(op => {
-      const fromColor = ADJUSTMENTS[op.fromAdj].color;
-      const toColor = ADJUSTMENTS[op.toAdj].color;
+      const opCls = op.deltaXP >= 0 ? "positive" : "negative";
       const deltaSign = op.deltaXP >= 0 ? "+" : "";
       return `
         <div class="adjust-line">
           <span class="adjust-name">${escapeHtml(op.npcName)}</span>
           <span class="adjust-flow">
-            <span style="color:${fromColor}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
-            <span style="opacity:0.5">→</span>
-            <span style="color:${toColor}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
+            <span class="adj-text ${op.fromAdj}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
+            <span class="meta-arrow">→</span>
+            <span class="adj-text ${op.toAdj}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
           </span>
-          <span class="adjust-delta" style="color:${sumColor}">${deltaSign}${op.deltaXP} XP</span>
+          <span class="adjust-delta ${opCls}">${deltaSign}${op.deltaXP} XP</span>
         </div>
       `;
     }).join("");
@@ -630,10 +609,10 @@
       <div class="plan-card adjust" data-plan-kind="adjust" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
         <div class="plan-header">
           <span class="plan-tag adjust">${T("tag.adjust")}</span>
-          <strong style="color:${sumColor}">${sumLabel}</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.adjustOps", { n: plan.count })}</span>
+          <strong class="${sumCls}">${sumLabel}</strong>
+          <span class="op-summary">${T("card.adjustOps", { n: plan.count })}</span>
           ${devTag}
-          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="adjust" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">${T("btn.previewPlan")}</button>
+          <button type="button" class="plan-preview-btn" data-preview-kind="adjust" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}">${T("btn.previewPlan")}</button>
         </div>
         <div class="plan-body">${lines}</div>
       </div>
@@ -641,25 +620,23 @@
   }
 
   function compositePlanToHtml(plan, sourceKey, sourceIdx, isAdd) {
-    const sumColor = plan.totalSum >= 0 ? "#27ae60" : "#e67e22";
+    const sumCls = plan.totalSum >= 0 ? "positive" : "negative";
     const sumLabel = (plan.totalSum >= 0 ? "+" : "") + plan.totalSum + " XP";
     const devTag = plan.deviation > 0
-      ? ` <span style="color:#e67e22;font-size:11px;font-weight:normal">${T("card.deviation", { n: plan.deviation })}</span>`
+      ? ` <span class="deviation">${T("card.deviation", { n: plan.deviation })}</span>`
       : "";
     const adjustLines = plan.adjustsPicked.map(op => {
-      const fromColor = ADJUSTMENTS[op.fromAdj].color;
-      const toColor = ADJUSTMENTS[op.toAdj].color;
+      const opCls = op.deltaXP >= 0 ? "positive" : "negative";
       const deltaSign = op.deltaXP >= 0 ? "+" : "";
-      const deltaColor = op.deltaXP >= 0 ? "#27ae60" : "#e67e22";
       return `
         <div class="adjust-line">
           <span class="adjust-name">${escapeHtml(op.npcName)}</span>
           <span class="adjust-flow">
-            <span style="color:${fromColor}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
-            <span style="opacity:0.5">→</span>
-            <span style="color:${toColor}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
+            <span class="adj-text ${op.fromAdj}">${ADJUSTMENTS[op.fromAdj].label} Lv ${op.fromLevel}</span>
+            <span class="meta-arrow">→</span>
+            <span class="adj-text ${op.toAdj}">${ADJUSTMENTS[op.toAdj].label} Lv ${op.toLevel}</span>
           </span>
-          <span class="adjust-delta" style="color:${deltaColor}">${deltaSign}${op.deltaXP} XP</span>
+          <span class="adjust-delta ${opCls}">${deltaSign}${op.deltaXP} XP</span>
         </div>
       `;
     }).join("");
@@ -678,15 +655,15 @@
       <div class="plan-card composite" data-plan-kind="composite" data-plan-source="${sourceKey}" data-plan-idx="${sourceIdx}">
         <div class="plan-header">
           <span class="plan-tag composite">${T("tag.composite")}</span>
-          <strong style="color:${sumColor}">${sumLabel}</strong>
-          <span style="opacity:0.7;font-weight:normal;font-size:11px">${T("card.compOps", { adjust: plan.adjustCount, action: addAction, addCount: plan.addCount, total: totalActions })}</span>
+          <strong class="${sumCls}">${sumLabel}</strong>
+          <span class="op-summary">${T("card.compOps", { adjust: plan.adjustCount, action: addAction, addCount: plan.addCount, total: totalActions })}</span>
           ${devTag}
-          <button type="button" class="btn-pill plan-preview-btn" data-preview-kind="composite" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}" style="margin-left:auto;padding:2px 8px;font-size:11px">${T("btn.previewAdjustOnly")}</button>
+          <button type="button" class="plan-preview-btn" data-preview-kind="composite" data-preview-source="${sourceKey}" data-preview-idx="${sourceIdx}">${T("btn.previewAdjustOnly")}</button>
         </div>
         <div class="plan-body">
-          <div style="font-size:10px;opacity:0.7;margin-bottom:2px">${T("card.step1Adjust")}</div>
+          <div class="step-label">${T("card.step1Adjust")}</div>
           ${adjustLines}
-          <div style="font-size:10px;opacity:0.7;margin:4px 0 2px 0">${stepLabel}</div>
+          <div class="step-label">${stepLabel}</div>
           ${addLines}
         </div>
       </div>
@@ -731,8 +708,8 @@
     if (all.length === 0) return `<p class="empty-msg">${T("plans.emptyAny")}</p>`;
     const top = all.slice(0, 12);
     const note = (exactCount === 0 && !includeNear)
-      ? `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">${T("plans.noteUnifiedAuto")}</div>`
-      : `<div style="font-size:11px;opacity:0.7;margin-bottom:4px">${T("plans.noteUnifiedAsc", { total: all.length, top: top.length })}</div>`;
+      ? `<div class="plan-note">${T("plans.noteUnifiedAuto")}</div>`
+      : `<div class="plan-note">${T("plans.noteUnifiedAsc", { total: all.length, top: top.length })}</div>`;
     return note + top.map(item => renderPlanItem(item, state)).join("");
   }
 
@@ -749,7 +726,7 @@
       return `<details><summary>${sectionTitle}</summary><div class="details-body"><p class="empty-msg">${T("plans.emptyAny")}</p></div></details>`;
     }
     if (exact.length > 0) {
-      content += `<div style="font-size:11px;opacity:0.7;margin:0 0 4px 0">${T("plans.noteExactCount", { n: exact.length })}</div>`;
+      content += `<div class="plan-note">${T("plans.noteExactCount", { n: exact.length })}</div>`;
       content += exact.map((p, i) => {
         const item = { kind, plan: p, sourceKey: "exact", sourceIdx: i };
         item.actions = planActions(item);
@@ -760,7 +737,7 @@
       const heading = exact.length === 0
         ? T("plans.noteNearOnly")
         : T("plans.noteNearAltShort");
-      content += `<div style="font-size:11px;opacity:0.7;margin:8px 0 4px 0">${heading}</div>`;
+      content += `<div class="plan-note">${heading}</div>`;
       content += near.map((p, i) => {
         const item = { kind, plan: p, sourceKey: "near", sourceIdx: i };
         item.actions = planActions(item);
@@ -792,12 +769,10 @@
       ? inner
       : `<details open><summary>${T("plans.titleByActions")}</summary><div class="details-body">${inner}</div></details>`;
     return `
-      <div style="margin-top:8px">
+      <div class="plans-section">
         ${renderPlanControls(state)}
         ${wrapped}
-        <div style="font-size:11px;opacity:0.6;text-align:right;margin-top:4px">
-          ${T("plans.diffLine", { label: diffLabel })}
-        </div>
+        <div class="plan-diffline">${T("plans.diffLine", { label: diffLabel })}</div>
       </div>
     `;
   }
@@ -825,19 +800,19 @@
       const rowCls = (o.delta === 0 ? " party" : "") + (!o.exists ? " missing" : "");
       const levelCell = o.exists
         ? `Lv ${o.level}`
-        : `<span style="opacity:0.5">Lv ${o.level}</span> <span style="opacity:0.5;font-size:10px">(N/A)</span>`;
+        : `Lv ${o.level} <span class="ref-na">(N/A)</span>`;
       const role = o.roleKey ? T(o.roleKey) : "";
-      return `<tr class="ref-row${rowCls}"><td>${levelCell}</td><td>${signed(o.delta)}</td><td>${o.xp}</td><td style="text-align:left;font-size:11px;opacity:0.85">${role}</td></tr>`;
+      return `<tr class="ref-row${rowCls}"><td>${levelCell}</td><td>${signed(o.delta)}</td><td>${o.xp}</td><td class="role">${role}</td></tr>`;
     }).join("");
     return `
       <details>
         <summary>${T("ref.title")}</summary>
         <div class="details-body">
           <table class="ref-table">
-            <thead><tr><th>${T("ref.level")}</th><th>${T("ref.vsParty")}</th><th>${T("ref.xp")}</th><th style="text-align:left">${T("ref.roleHeader")}</th></tr></thead>
+            <thead><tr><th>${T("ref.level")}</th><th>${T("ref.vsParty")}</th><th>${T("ref.xp")}</th><th>${T("ref.roleHeader")}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <div style="font-size:11px;opacity:0.6;margin-top:4px">${T("ref.note")}</div>
+          <div class="ref-note">${T("ref.note")}</div>
         </div>
       </details>
     `;
@@ -849,9 +824,9 @@
     const dis = canAct ? "" : " disabled";
     return `
       <div class="btn-row">
-        <button type="button" class="btn-pill" id="reset-btn"${dis}>${T("btn.reset")}</button>
-        <div style="flex:1"></div>
-        <button type="button" class="btn-pill primary" id="apply-btn"${dis}>
+        <button type="button" id="reset-btn"${dis}>${T("btn.reset")}</button>
+        <div class="spacer"></div>
+        <button type="button" class="bright" id="apply-btn"${dis}>
           ${canAct ? T("btn.applyN", { n: changedCount }) : T("btn.noChanges")}
         </button>
       </div>

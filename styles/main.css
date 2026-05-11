@@ -1,114 +1,422 @@
-.xp-tool { font-size: 13px; }
-.xp-tool details { margin: 6px 0; border: 1px solid #8884; border-radius: 4px; }
-.xp-tool details summary { cursor: pointer; padding: 6px 10px; background: #8881; font-weight: 600; user-select: none; }
-.xp-tool details[open] summary { border-bottom: 1px solid #8884; }
-.xp-tool .details-body { padding: 6px 10px; }
+/* PF2E XP Budget Tool — native PF2e / Foundry styling.
+   No custom palette: relies on system + core CSS variables with safe fallbacks. */
 
-.xp-tool .xp-header { display: grid; grid-template-columns: 0.9fr 0.9fr 1.1fr 1.3fr; gap: 6px; margin-bottom: 8px; }
-.xp-tool .xp-stat { background: #8881; padding: 6px 8px; border-radius: 4px; text-align: center; }
-.xp-tool .xp-stat-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-.xp-tool .xp-stat-value { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.xp-tool { font-size: var(--font-size-13, 0.8125rem); line-height: 1.4; }
 
-.xp-tool .xp-bar-wrap { margin: 8px 0; }
-.xp-tool .xp-bar-labels { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.85; }
-.xp-tool .xp-bar { position: relative; height: 22px; background: #8882; border-radius: 11px; overflow: hidden; }
-.xp-tool .xp-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; transition: width 0.25s, background 0.25s; }
-.xp-tool .xp-bar-target { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; box-shadow: 0 0 0 1px #000; z-index: 2; }
-.xp-tool .xp-bar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; text-shadow: 0 0 4px #fff, 0 0 4px #fff; z-index: 3; }
+.xp-tool details { margin: 0.4rem 0; }
+.xp-tool details > summary {
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  font-weight: bold;
+  user-select: none;
+  border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+}
+.xp-tool details > summary:hover { color: var(--color-text-accent, var(--color-warm-1, #ee9b3a)); }
+.xp-tool .details-body { padding: 0.35rem 0.25rem 0.2rem; }
+.xp-tool .empty-msg {
+  color: var(--color-text-subtle, var(--color-dark-4));
+  text-align: center;
+  padding: 0.4rem 0;
+  font-style: italic;
+}
 
-.xp-tool .xp-input { background: #fff3; border: 1px solid #8886; border-radius: 3px; padding: 1px 4px; font: inherit; color: inherit; }
+/* ---------- header strip (party size / level / threat / xp) ---------- */
+.xp-tool .xp-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+.xp-tool .xp-stat {
+  text-align: center;
+  padding: 0.2rem 0.3rem;
+  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+  background: rgba(0, 0, 0, 0.04);
+}
+.xp-tool .xp-stat-label {
+  font-size: var(--font-size-10, 0.625rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+}
+.xp-tool .xp-stat-value {
+  font-weight: bold;
+  line-height: 1.25;
+}
+.xp-tool .xp-input {
+  width: 4em;
+  text-align: center;
+  font: inherit;
+}
 
-.xp-tool .gap-banner { padding: 8px 10px; border-radius: 4px; margin: 8px 0; font-weight: 600; text-align: center; font-size: 13px; }
-.xp-tool .gap-banner.match { background: #27ae6033; color: #229954; }
-.xp-tool .gap-banner.under { background: #f39c1233; color: #b9770e; }
-.xp-tool .gap-banner.over { background: #e74c3c33; color: #a93226; }
+/* threat rating — same colors as PF2e combat tracker (#combat .metrics .threat) */
+.xp-tool .xp-stat.threat .xp-stat-value {
+  text-shadow: 1px 1px 2px var(--color-shadow-dark, #000);
+}
+.xp-tool .xp-stat.threat.trivial  .xp-stat-value { color: aqua;   }
+.xp-tool .xp-stat.threat.low      .xp-stat-value { color: lime;   }
+.xp-tool .xp-stat.threat.moderate .xp-stat-value { color: yellow; }
+.xp-tool .xp-stat.threat.severe   .xp-stat-value { color: orange; }
+.xp-tool .xp-stat.threat.extreme  .xp-stat-value { color: red;    }
 
-.xp-tool .npc-card { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 6px 10px; margin: 4px 0; background: #8881; border-radius: 4px; border-left: 3px solid transparent; }
-.xp-tool .npc-card.changed { border-left-color: #f39c12; background: #f39c1218; }
-.xp-tool .npc-info { min-width: 0; }
-.xp-tool .npc-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.xp-tool .npc-meta { display: flex; gap: 6px; align-items: center; font-size: 11px; opacity: 0.85; margin-top: 1px; flex-wrap: wrap; }
-.xp-tool .meta-arrow { opacity: 0.5; }
-.xp-tool .meta-xp { margin-left: auto; font-weight: 600; }
-.xp-tool .npc-final { padding: 3px 8px; border-radius: 3px; font-weight: 700; font-size: 12px; min-width: 3em; text-align: center; }
-
-.xp-tool .adj-toggle { display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #8886; }
-.xp-tool .adj-btn { padding: 4px 9px; cursor: pointer; background: transparent; border: 0; font-size: 11px; color: inherit; line-height: 1.2; }
-.xp-tool .adj-btn + .adj-btn { border-left: 1px solid #8886; }
-.xp-tool .adj-btn:hover:not(.active) { background: #8883; }
-.xp-tool .adj-btn.active { color: #fff; font-weight: 700; }
-.xp-tool .adj-btn.active.adj-weak { background: #2980b9; }
-.xp-tool .adj-btn.active.adj-normal { background: #555; }
-.xp-tool .adj-btn.active.adj-elite { background: #c0392b; }
-
-.xp-tool .hazard-list { font-size: 12px; opacity: 0.85; padding: 4px 8px; background: #8881; border-radius: 4px; margin: 4px 0; }
-
-.xp-tool .plan-card { background: #8881; border-radius: 5px; padding: 8px 10px; margin: 6px 0; border-left: 3px solid #888; }
-.xp-tool .plan-card.add { border-left-color: #27ae60; }
-.xp-tool .plan-card.remove { border-left-color: #e67e22; }
-.xp-tool .plan-card.adjust { border-left-color: #2980b9; }
-.xp-tool .plan-card.composite { border-left-color: #9b59b6; }
-.xp-tool .plan-header { font-weight: 700; margin-bottom: 4px; font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.xp-tool .plan-line { display: grid; grid-template-columns: 2.5em auto auto 1fr; gap: 6px; align-items: center; padding: 1px 0; font-size: 12px; }
-.xp-tool .plan-count { font-weight: 700; }
-.xp-tool .plan-level { padding: 1px 6px; background: #8882; border-radius: 3px; text-align: center; }
-.xp-tool .plan-delta { opacity: 0.7; font-size: 10px; }
-.xp-tool .plan-xp { font-family: monospace; opacity: 0.9; text-align: right; }
-
-.xp-tool .adjust-line { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 2px 0; font-size: 12px; }
-.xp-tool .adjust-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.xp-tool .adjust-flow { font-size: 11px; white-space: nowrap; }
-.xp-tool .adjust-delta { font-family: monospace; font-weight: 700; min-width: 5em; text-align: right; }
-
-.xp-tool .plan-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
-.xp-tool .plan-tag.adjust { background: #2980b922; color: #2980b9; }
-.xp-tool .plan-tag.add { background: #27ae6022; color: #27ae60; }
-.xp-tool .plan-tag.remove { background: #e67e2222; color: #e67e22; }
-.xp-tool .plan-tag.composite { background: #9b59b622; color: #9b59b6; }
-
-.xp-tool .ref-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.xp-tool .ref-table th, .xp-tool .ref-table td { padding: 3px 6px; text-align: center; border-bottom: 1px solid #8882; }
-.xp-tool .ref-table th { background: #8881; }
-.xp-tool .ref-row.party td { background: #2980b922; font-weight: 700; }
-.xp-tool .ref-row.missing td { opacity: 0.55; font-style: italic; }
-
-.xp-tool .btn-row { display: flex; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #8884; }
-.xp-tool .btn-pill { padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; border: 1px solid #8886; background: #8882; color: inherit; line-height: 1.3; }
-.xp-tool .btn-pill:hover:not(:disabled) { background: #8884; }
-.xp-tool .btn-pill.primary { background: #27ae60; color: #fff; border-color: #229954; }
-.xp-tool .btn-pill.primary:hover:not(:disabled) { background: #229954; }
-.xp-tool .btn-pill:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.xp-tool .view-tabs { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid #8886; }
-.xp-tool .view-tab { padding: 4px 10px; cursor: pointer; background: transparent; border: 0; font-size: 12px; color: inherit; line-height: 1.3; flex: 1; }
-.xp-tool .view-tab + .view-tab { border-left: 1px solid #8886; }
-.xp-tool .view-tab:hover:not(.active) { background: #8883; }
-.xp-tool .view-tab.active { background: #2980b9; color: #fff; font-weight: 700; }
-
-.xp-tool .plan-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 6px 8px; background: #8881; border-radius: 4px; margin-bottom: 6px; }
-.xp-tool .plan-controls .control-label { font-size: 11px; opacity: 0.7; }
-.xp-tool .plan-controls label.show-near-label { font-size: 12px; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
-
-.xp-tool .empty-msg { opacity: 0.6; text-align: center; padding: 8px; font-size: 12px; }
-
-#sidebar .pf2e-xp-tool-btn,
-#actors-popout .pf2e-xp-tool-btn,
-#macros-popout .pf2e-xp-tool-btn,
-.pf2e-xp-tool-btn {
+/* ---------- progress bar ---------- */
+.xp-tool .xp-bar-wrap { margin: 0.4rem 0; }
+.xp-tool .xp-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-secondary, var(--color-dark-3));
+  margin-bottom: 0.2rem;
+}
+.xp-tool .xp-bar {
+  position: relative;
+  height: 16px;
+  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+  background: rgba(0, 0, 0, 0.04);
+}
+.xp-tool .xp-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  transition: width 0.2s, background-color 0.2s;
+  background: var(--color-pf-alternate, #786452);
+}
+.xp-tool .xp-bar-fill.under { background: var(--color-level-warning, #ee9b3a); }
+.xp-tool .xp-bar-fill.match { background: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .xp-bar-fill.over  { background: var(--color-pf-primary, #5e0000); }
+.xp-tool .xp-bar-target {
+  position: absolute;
+  top: -2px; bottom: -2px;
+  width: 2px;
+  background: var(--color-text-primary, var(--color-dark-2));
+  z-index: 2;
+}
+.xp-tool .xp-bar-text {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 100%;
-  margin: 4px 0;
-  padding: 6px 10px;
-  background: linear-gradient(180deg, #2980b9, #1f6391);
-  color: #fff;
-  border: 1px solid #1f6391;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-11, 0.6875rem);
+  font-weight: bold;
+  color: var(--color-light-1, #f7f3e8);
+  text-shadow: 1px 1px 2px var(--color-shadow-dark, #000);
 }
-.pf2e-xp-tool-btn:hover { background: linear-gradient(180deg, #3498db, #2475a8); }
-.pf2e-xp-tool-btn i { margin-right: 0; }
+
+/* ---------- gap banner ---------- */
+.xp-tool .gap-banner {
+  margin: 0.35rem 0;
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  border-left: 3px solid var(--color-pf-alternate, #786452);
+  background: rgba(0, 0, 0, 0.04);
+}
+.xp-tool .gap-banner.match { border-left-color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .gap-banner.under { border-left-color: var(--color-level-warning, #ee9b3a); }
+.xp-tool .gap-banner.over  { border-left-color: var(--color-pf-primary, #5e0000); }
+
+/* ---------- NPC list ---------- */
+.xp-tool .npc-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.15rem 0.3rem;
+  border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+}
+.xp-tool .npc-card.changed { background: rgba(238, 155, 58, 0.10); }
+.xp-tool .npc-info { min-width: 0; }
+.xp-tool .npc-name {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xp-tool .npc-meta {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-secondary, var(--color-dark-3));
+  flex-wrap: wrap;
+}
+.xp-tool .meta-base { color: var(--color-text-subtle, var(--color-dark-4)); }
+.xp-tool .meta-arrow { color: var(--color-text-subtle, var(--color-dark-4)); }
+.xp-tool .meta-xp { margin-left: auto; font-weight: bold; }
+.xp-tool .npc-final {
+  padding: 0 0.3rem;
+  font-weight: bold;
+  min-width: 3em;
+  text-align: center;
+  border: 1px solid currentColor;
+  font-size: var(--font-size-12, 0.75rem);
+}
+.xp-tool .changed-dot { color: var(--color-warm-2, #c9593f); margin-left: 0.2rem; }
+.xp-tool .pending-tag {
+  font-weight: normal;
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-warm-2, #c9593f);
+  margin-left: 0.3rem;
+}
+
+/* shared elite/weak coloring (text + npc-final + adj button active) */
+.xp-tool .adj-text.weak,
+.xp-tool .npc-final.weak    { color: var(--color-pf-text-adjusted-lower, #cc3311); }
+.xp-tool .adj-text.normal,
+.xp-tool .npc-final.normal  { color: var(--color-text-secondary, var(--color-dark-3)); }
+.xp-tool .adj-text.elite,
+.xp-tool .npc-final.elite   { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .adj-text { font-weight: bold; }
+
+/* ---------- adjustment toggle ---------- */
+.xp-tool .adj-toggle {
+  display: inline-flex;
+  border: 1px solid var(--color-border-light-tertiary, #7a7971);
+}
+.xp-tool .adj-btn {
+  padding: 0.1rem 0.55rem;
+  margin: 0;
+  font-size: var(--font-size-11, 0.6875rem);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  color: var(--color-text-secondary, var(--color-dark-3));
+  line-height: 1.4;
+  box-shadow: none;
+}
+.xp-tool .adj-btn + .adj-btn {
+  border-left: 1px solid var(--color-border-light-tertiary, #7a7971);
+}
+.xp-tool .adj-btn:hover:not(.active):not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text-primary);
+}
+.xp-tool .adj-btn.active { color: #fff; font-weight: bold; }
+.xp-tool .adj-btn.active.adj-weak   { background: var(--color-pf-text-adjusted-lower,  #cc3311); }
+.xp-tool .adj-btn.active.adj-normal { background: var(--color-pf-alternate,            #786452); }
+.xp-tool .adj-btn.active.adj-elite  { background: var(--color-pf-text-adjusted-higher, #009988); }
+
+/* ---------- hazard list ---------- */
+.xp-tool .hazard-list {
+  font-size: var(--font-size-12, 0.75rem);
+  color: var(--color-text-secondary, var(--color-dark-3));
+  padding: 0.2rem 0.4rem;
+  margin: 0.3rem 0 0.1rem;
+  border-left: 2px solid var(--color-border-light-tertiary, #7a7971);
+}
+.xp-tool .hazard-list strong { margin-right: 0.4rem; }
+.xp-tool .hazard-list span { margin-right: 0.5rem; }
+
+/* ---------- plan cards ---------- */
+.xp-tool .plan-card {
+  margin: 0.3rem 0;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+  border-left-width: 3px;
+}
+.xp-tool .plan-card.add       { border-left-color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .plan-card.remove    { border-left-color: var(--color-level-warning,           #ee9b3a); }
+.xp-tool .plan-card.adjust    { border-left-color: var(--color-pf-secondary,            #171f69); }
+.xp-tool .plan-card.composite { border-left-color: var(--color-pf-alternate-dark,       #443730); }
+
+.xp-tool .plan-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: bold;
+  margin-bottom: 0.15rem;
+}
+.xp-tool .plan-header .op-summary,
+.xp-tool .plan-note,
+.xp-tool .plan-diffline {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+  font-weight: normal;
+}
+.xp-tool .plan-diffline { text-align: right; margin-top: 0.25rem; }
+.xp-tool .plan-note { margin: 0.1rem 0 0.3rem; }
+.xp-tool .deviation {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-level-warning, #ee9b3a);
+  font-weight: normal;
+}
+
+.xp-tool .plan-line {
+  display: grid;
+  grid-template-columns: 2.5em auto auto 1fr;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.05rem 0;
+  font-size: var(--font-size-12, 0.75rem);
+}
+.xp-tool .plan-count { font-weight: bold; }
+.xp-tool .plan-level {
+  padding: 0 0.3rem;
+  border: 1px solid var(--color-border-light-tertiary, #7a7971);
+  text-align: center;
+}
+.xp-tool .plan-delta {
+  color: var(--color-text-subtle, var(--color-dark-4));
+  font-size: var(--font-size-10, 0.625rem);
+}
+.xp-tool .plan-xp {
+  font-family: var(--font-monospace, monospace);
+  text-align: right;
+  color: var(--color-text-secondary, var(--color-dark-3));
+}
+.xp-tool .step-label {
+  font-size: var(--font-size-10, 0.625rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+  margin: 0.25rem 0 0.05rem;
+}
+
+.xp-tool .adjust-line {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: var(--font-size-12, 0.75rem);
+  padding: 0.05rem 0;
+}
+.xp-tool .adjust-name {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xp-tool .adjust-flow {
+  font-size: var(--font-size-11, 0.6875rem);
+  white-space: nowrap;
+}
+.xp-tool .adjust-delta {
+  font-family: var(--font-monospace, monospace);
+  font-weight: bold;
+  min-width: 5em;
+  text-align: right;
+}
+.xp-tool .positive { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .negative { color: var(--color-level-warning, #ee9b3a); }
+.xp-tool .adjust-delta.positive { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .adjust-delta.negative { color: var(--color-level-warning, #ee9b3a); }
+
+/* ---------- plan tag (inline pill) ---------- */
+.xp-tool .plan-tag {
+  display: inline-block;
+  padding: 0 0.35rem;
+  font-size: var(--font-size-10, 0.625rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid currentColor;
+  line-height: 1.5;
+}
+.xp-tool .plan-tag.adjust    { color: var(--color-pf-secondary,            #171f69); }
+.xp-tool .plan-tag.add       { color: var(--color-pf-text-adjusted-higher, #009988); }
+.xp-tool .plan-tag.remove    { color: var(--color-level-warning,           #ee9b3a); }
+.xp-tool .plan-tag.composite { color: var(--color-pf-alternate-dark,       #443730); }
+
+/* preview-only inline button inside plan header */
+.xp-tool .plan-preview-btn {
+  margin-left: auto;
+  padding: 0.05rem 0.5rem;
+  font-size: var(--font-size-11, 0.6875rem);
+  line-height: 1.4;
+}
+
+/* ---------- reference table (PF2e Table 10-2) ---------- */
+.xp-tool .ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-12, 0.75rem);
+}
+.xp-tool .ref-table th,
+.xp-tool .ref-table td {
+  padding: 0.15rem 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+}
+.xp-tool .ref-table th {
+  background: var(--color-pf-alternate, #786452);
+  color: var(--color-light-1, #f7f3e8);
+  font-weight: bold;
+}
+.xp-tool .ref-table th:last-child,
+.xp-tool .ref-table td:last-child { text-align: left; }
+.xp-tool .ref-table td.role {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-secondary, var(--color-dark-3));
+}
+.xp-tool .ref-row.party td {
+  background: rgba(94, 0, 0, 0.10);
+  font-weight: bold;
+}
+.xp-tool .ref-row.missing td {
+  opacity: 0.55;
+  font-style: italic;
+}
+.xp-tool .ref-na { font-size: var(--font-size-10, 0.625rem); color: var(--color-text-subtle); }
+.xp-tool .ref-note {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+  margin-top: 0.3rem;
+}
+
+/* ---------- view tabs + plan controls ---------- */
+.xp-tool .plan-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.2rem 0.4rem;
+  margin: 0.3rem 0;
+  border: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+}
+.xp-tool .plan-controls .control-label {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--color-text-subtle, var(--color-dark-4));
+}
+.xp-tool .view-tabs {
+  display: inline-flex;
+  border: 1px solid var(--color-border-light-tertiary, #7a7971);
+}
+.xp-tool .view-tab {
+  padding: 0.1rem 0.6rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: var(--font-size-12, 0.75rem);
+  cursor: pointer;
+  color: var(--color-text-secondary, var(--color-dark-3));
+  line-height: 1.4;
+  box-shadow: none;
+}
+.xp-tool .view-tab + .view-tab {
+  border-left: 1px solid var(--color-border-light-tertiary, #7a7971);
+}
+.xp-tool .view-tab.active {
+  background: var(--color-pf-secondary, #171f69);
+  color: #fff;
+  font-weight: bold;
+}
+.xp-tool .show-near-label {
+  font-size: var(--font-size-12, 0.75rem);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ---------- bottom action row ---------- */
+.xp-tool .btn-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--color-border-divider, var(--color-border-light-tertiary, #baa991));
+}
+.xp-tool .btn-row .spacer { flex: 1; }
+
+/* ---------- sidebar inject button: defer to FVTT default button look ---------- */
+.pf2e-xp-tool-btn { margin: 0.25rem 0; }
+.pf2e-xp-tool-btn i { margin-right: 0.25rem; }

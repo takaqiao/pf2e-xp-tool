@@ -21,7 +21,7 @@
             }
         ]
     },
-    "scripts": ["scripts/main.js"],
+    "esmodules": ["scripts/main.mjs"],
     "styles": ["styles/main.css"],
     "languages": [
         { "lang": "en",    "name": "English",      "path": "lang/en.json" },

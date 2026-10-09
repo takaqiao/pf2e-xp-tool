@@ -1,5 +1,3 @@
-/* PF2E XP Budget Tool — native PF2e / Foundry styling.
-   Information density tightened: single-line NPC cards, single-line plan rows. */
 
 .xp-tool { font-size: var(--font-size-13, 0.8125rem); line-height: 1.4; }
 
@@ -20,7 +18,6 @@
   font-style: italic;
 }
 
-/* ---------- header strip (party size / level / threat) ---------- */
 .xp-tool .xp-header {
   display: grid;
   grid-template-columns: auto auto 1fr;
@@ -47,7 +44,6 @@
   font: inherit;
 }
 
-/* threat — same colors as PF2e combat tracker */
 .xp-tool .xp-stat.threat .xp-stat-value {
   text-shadow: 1px 1px 2px var(--color-shadow-dark, #000);
 }
@@ -57,7 +53,6 @@
 .xp-tool .xp-stat.threat.severe   .xp-stat-value { color: orange; }
 .xp-tool .xp-stat.threat.extreme  .xp-stat-value { color: red;    }
 
-/* ---------- progress bar (gap label inline) ---------- */
 .xp-tool .xp-bar-wrap { margin: 0.3rem 0 0.4rem; }
 .xp-tool .xp-bar-labels {
   display: flex;
@@ -93,10 +88,9 @@
   z-index: 2;
 }
 
-/* ---------- NPC list — single line per row ---------- */
 .xp-tool .npc-card {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto;
   gap: 0.5rem;
   align-items: center;
   padding: 0.1rem 0.3rem;
@@ -131,7 +125,6 @@
   margin-left: 0.3rem;
 }
 
-/* elite/weak text + npc-level coloring */
 .xp-tool .adj-text.weak,
 .xp-tool .npc-level.weak   { color: var(--color-pf-text-adjusted-lower,  #cc3311); }
 .xp-tool .adj-text.normal,
@@ -139,7 +132,6 @@
 .xp-tool .adj-text.elite,
 .xp-tool .npc-level.elite  { color: var(--color-pf-text-adjusted-higher, #009988); }
 
-/* ---------- adjustment toggle (W / N / E) ---------- */
 .xp-tool .adj-toggle {
   display: inline-flex;
   border: 1px solid var(--color-border-light-tertiary, #7a7971);
@@ -168,7 +160,6 @@
 .xp-tool .adj-btn.active.adj-normal { background: var(--color-pf-alternate,            #786452); }
 .xp-tool .adj-btn.active.adj-elite  { background: var(--color-pf-text-adjusted-higher, #009988); }
 
-/* ---------- hazard list ---------- */
 .xp-tool .hazard-list {
   font-size: var(--font-size-12, 0.75rem);
   color: var(--color-text-secondary, var(--color-dark-3));
@@ -179,7 +170,6 @@
 .xp-tool .hazard-list strong { margin-right: 0.3rem; }
 .xp-tool .hazard-list span { margin-right: 0.5rem; }
 
-/* ---------- plan rows — one line per plan ---------- */
 .xp-tool .plan-note {
   font-size: var(--font-size-11, 0.6875rem);
   color: var(--color-text-subtle, var(--color-dark-4));
@@ -228,7 +218,6 @@
   font-style: italic;
 }
 
-/* ---------- reference table (Table 10-2) ---------- */
 .xp-tool .ref-table {
   width: 100%;
   border-collapse: collapse;
@@ -266,7 +255,6 @@
   margin-top: 0.3rem;
 }
 
-/* ---------- bottom action row ---------- */
 .xp-tool .btn-row {
   display: flex;
   gap: 0.4rem;
@@ -276,6 +264,698 @@
 }
 .xp-tool .btn-row .spacer { flex: 1; }
 
-/* ---------- sidebar inject button ---------- */
 .pf2e-xp-tool-btn { margin: 0.25rem 0; }
 .pf2e-xp-tool-btn i { margin-right: 0.25rem; }
+
+.pf2e-xp-tool-dialog {
+  --xp-bg: #11151b;
+  --xp-surface: #1a2029;
+  --xp-surface-raised: #242c37;
+  --xp-border: #3d4857;
+  --xp-border-strong: #596779;
+  --xp-text: #e7ebf0;
+  --xp-text-muted: #aab4c0;
+  --xp-text-subtle: #7f8b99;
+  --xp-accent: #d9a24a;
+  --xp-accent-hover: #f0bd68;
+  --xp-success: #56c9a5;
+  --xp-danger: #ef6b70;
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .window-header {
+  background: #0b0e12;
+  border-bottom-color: var(--xp-border-strong);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .window-content {
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog form,
+.pf2e-xp-tool-dialog label { color: var(--xp-text); }
+
+.pf2e-xp-tool-dialog input,
+.pf2e-xp-tool-dialog select,
+.pf2e-xp-tool-dialog textarea {
+  background: #0c1015;
+  border: 1px solid var(--xp-border);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog input:focus,
+.pf2e-xp-tool-dialog select:focus,
+.pf2e-xp-tool-dialog textarea:focus {
+  border-color: var(--xp-accent);
+  box-shadow: 0 0 0 1px rgba(217, 162, 74, 0.35);
+  outline: none;
+}
+
+.pf2e-xp-tool-dialog button {
+  background: var(--xp-surface-raised);
+  border: 1px solid var(--xp-border-strong);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog button:hover:not(:disabled),
+.pf2e-xp-tool-dialog button:focus-visible {
+  background: #303a47;
+  border-color: var(--xp-accent);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(217, 162, 74, 0.25);
+}
+
+.pf2e-xp-tool-dialog button.bright {
+  background: #76541f;
+  border-color: var(--xp-accent);
+}
+
+.pf2e-xp-tool-dialog button.bright:hover:not(:disabled) { background: #916827; }
+.pf2e-xp-tool-dialog button:disabled { cursor: not-allowed; opacity: 0.45; }
+.pf2e-xp-tool-party-dialog .form-group { border-bottom-color: var(--xp-border); }
+
+.pf2e-xp-tool-dialog .xp-tool { color: var(--xp-text); }
+.pf2e-xp-tool-dialog .xp-tool details > summary { border-bottom-color: var(--xp-border); }
+.pf2e-xp-tool-dialog .xp-tool details > summary:hover { color: var(--xp-accent-hover); }
+.pf2e-xp-tool-dialog .xp-tool .empty-msg,
+.pf2e-xp-tool-dialog .xp-tool .plan-note,
+.pf2e-xp-tool-dialog .xp-tool .plan-icon,
+.pf2e-xp-tool-dialog .xp-tool .plan-ops,
+.pf2e-xp-tool-dialog .xp-tool .ref-na,
+.pf2e-xp-tool-dialog .xp-tool .ref-note { color: var(--xp-text-subtle); }
+
+.pf2e-xp-tool-dialog .xp-tool .xp-stat {
+  background: var(--xp-surface);
+  border-color: var(--xp-border);
+}
+
+.pf2e-xp-tool-dialog .xp-tool .xp-stat-label,
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-labels,
+.pf2e-xp-tool-dialog .xp-tool .npc-xp,
+.pf2e-xp-tool-dialog .xp-tool .hazard-list,
+.pf2e-xp-tool-dialog .xp-tool .ref-table td.role { color: var(--xp-text-muted); }
+
+.pf2e-xp-tool-dialog .xp-tool .gap-label.match,
+.pf2e-xp-tool-dialog .xp-tool .plan-sum.positive,
+.pf2e-xp-tool-dialog .xp-tool .adj-text.elite,
+.pf2e-xp-tool-dialog .xp-tool .npc-level.elite { color: var(--xp-success); }
+.pf2e-xp-tool-dialog .xp-tool .gap-label.over { color: var(--xp-danger); }
+
+.pf2e-xp-tool-dialog .xp-tool .xp-bar {
+  background: #090c10;
+  border-color: var(--xp-border);
+}
+
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-fill.match { background: var(--xp-success); }
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-fill.over { background: var(--xp-danger); }
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-target { background: #f3f5f7; }
+
+.pf2e-xp-tool-dialog .xp-tool .npc-card,
+.pf2e-xp-tool-dialog .xp-tool .plan-row,
+.pf2e-xp-tool-dialog .xp-tool .ref-table th,
+.pf2e-xp-tool-dialog .xp-tool .ref-table td { border-color: var(--xp-border); }
+.pf2e-xp-tool-dialog .xp-tool .npc-card.changed { background: rgba(217, 162, 74, 0.12); }
+
+.pf2e-xp-tool-dialog .xp-tool .adj-text.weak,
+.pf2e-xp-tool-dialog .xp-tool .npc-level.weak { color: #f07d74; }
+.pf2e-xp-tool-dialog .xp-tool .adj-text.normal,
+.pf2e-xp-tool-dialog .xp-tool .npc-level.normal { color: var(--xp-text); }
+
+.pf2e-xp-tool-dialog .xp-tool .adj-toggle,
+.pf2e-xp-tool-dialog .xp-tool .adj-btn + .adj-btn { border-color: var(--xp-border-strong); }
+.pf2e-xp-tool-dialog .xp-tool .adj-btn { background: transparent; color: var(--xp-text-muted); }
+.pf2e-xp-tool-dialog .xp-tool .adj-btn:hover:not(.active):not(:disabled) {
+  background: var(--xp-surface-raised);
+  color: var(--xp-text);
+}
+.pf2e-xp-tool-dialog .xp-tool .adj-btn.active.adj-weak { background: #9f393e; }
+.pf2e-xp-tool-dialog .xp-tool .adj-btn.active.adj-normal { background: #5a6573; }
+.pf2e-xp-tool-dialog .xp-tool .adj-btn.active.adj-elite { background: #187d68; }
+.pf2e-xp-tool-dialog .xp-tool .hazard-list { border-left-color: var(--xp-border-strong); }
+.pf2e-xp-tool-dialog .xp-tool .plan-row.clickable:hover { background: var(--xp-surface-raised); }
+
+.pf2e-xp-tool-dialog .xp-tool .ref-table th {
+  background: var(--xp-surface-raised);
+  color: var(--xp-text);
+}
+.pf2e-xp-tool-dialog .xp-tool .ref-row.party td { background: rgba(217, 162, 74, 0.13); }
+.pf2e-xp-tool-dialog .xp-tool .btn-row { border-top-color: var(--xp-border); }
+
+.pf2e-xp-tool-dialog .xp-header {
+  grid-template-columns: auto auto minmax(9rem, 1.4fr) minmax(7rem, 1fr);
+}
+
+.pf2e-xp-tool-dialog .target-control {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.pf2e-xp-tool-dialog .difficulty-input {
+  min-width: 0;
+  width: 100%;
+  height: 1.75rem;
+}
+
+.pf2e-xp-tool-dialog .difficulty-input option {
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-main-dialog .dialog-buttons { display: none; }
+
+.pf2e-xp-tool-dialog .npc-card.preview-added {
+  background: rgba(86, 201, 165, 0.1);
+  border-left: 2px solid var(--xp-success);
+}
+
+.pf2e-xp-tool-dialog .npc-card.preview-added .npc-name i,
+.pf2e-xp-tool-dialog .preview-count-tag { color: var(--xp-success); }
+
+.pf2e-xp-tool-dialog .preview-tag {
+  color: var(--xp-success);
+  font-size: var(--font-size-10, 0.625rem);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.pf2e-xp-tool-dialog .npc-card.preview-added .preview-tag { grid-column: 4 / 6; }
+
+.pf2e-xp-tool-dialog .hp-boost-btn {
+  min-width: 2.2rem;
+  margin: 0;
+  padding: 0 0.35rem;
+  background: transparent;
+  border: 1px solid var(--xp-border-strong);
+  border-radius: 0;
+  color: var(--xp-text-muted);
+  font-size: var(--font-size-10, 0.625rem);
+  line-height: 1.5;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .hp-boost-btn.active {
+  background: #187d68;
+  border-color: var(--xp-success);
+  color: #fff;
+  font-weight: bold;
+}
+
+.pf2e-xp-tool-dialog .npc-bulk-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.2rem 0.35rem;
+  border-bottom: 1px solid var(--xp-border);
+}
+
+.pf2e-xp-tool-dialog .hp-boost-all-btn {
+  width: auto;
+  min-width: 4.5rem;
+  margin: 0;
+  padding: 0.1rem 0.5rem;
+  background: transparent;
+  border: 1px solid var(--xp-border-strong);
+  color: var(--xp-text-muted);
+  font-size: var(--font-size-11, 0.6875rem);
+  line-height: 1.5;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .hp-boost-all-btn.active {
+  background: #187d68;
+  border-color: var(--xp-success);
+  color: #fff;
+  font-weight: bold;
+}
+
+.pf2e-xp-tool-dialog .fortify-warning {
+  margin-top: 0.25rem;
+  color: var(--xp-accent-hover);
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+.pf2e-xp-tool-dialog .preview-count-tag {
+  font-size: var(--font-size-11, 0.6875rem);
+  margin-left: 0.3rem;
+}
+
+.pf2e-xp-tool-dialog .preview-creature-link {
+  display: inline;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--xp-text);
+  font: inherit;
+  font-weight: bold;
+  line-height: inherit;
+  text-align: left;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .preview-creature-link:hover:not(:disabled),
+.pf2e-xp-tool-dialog .preview-creature-link:focus-visible {
+  background: transparent;
+  border: 0;
+  color: var(--xp-accent-hover);
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .custom-target-input { width: 4.5rem; }
+
+.pf2e-xp-tool-dialog .xp-tool {
+  --xp-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pf2e-xp-tool-dialog .xp-tool details {
+  margin: 0;
+  border: 1px solid var(--xp-border);
+  border-radius: var(--xp-radius);
+  background: rgba(26, 32, 41, 0.5);
+  overflow: hidden;
+}
+
+.pf2e-xp-tool-dialog .xp-tool details > summary {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 0;
+  background: rgba(36, 44, 55, 0.5);
+  font-size: var(--font-size-12, 0.75rem);
+  letter-spacing: 0.02em;
+}
+
+.pf2e-xp-tool-dialog .xp-tool details[open] > summary { border-bottom: 1px solid var(--xp-border); }
+.pf2e-xp-tool-dialog .xp-tool .details-body { padding: 0.35rem; }
+
+.pf2e-xp-tool-dialog .xp-header {
+  grid-template-columns: 5rem 5rem minmax(12rem, 1fr);
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0.4rem 0;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--xp-border);
+  border-radius: var(--xp-radius);
+  background: var(--xp-surface-raised);
+}
+
+.pf2e-xp-tool-dialog .xp-structure-control {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.pf2e-xp-tool-dialog .xp-structure-control label {
+  color: var(--xp-text-subtle);
+  font-size: var(--font-size-11, 0.6875rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pf2e-xp-tool-dialog .xp-structure-control select {
+  width: auto;
+  max-width: 13rem;
+  height: 1.65rem;
+  margin: 0;
+  padding: 0 0.3rem;
+  border: 1px solid var(--xp-border-strong);
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .xp-structure-control select.active { border-color: var(--xp-accent); }
+
+.pf2e-xp-tool-dialog .xp-structure-control option {
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row label {
+  flex: none;
+  color: var(--xp-text-subtle);
+  font-size: var(--font-size-11, 0.6875rem);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pf2e-xp-tool-dialog .trait-card-list {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.pf2e-xp-tool-dialog .trait-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  padding: 0.15rem 0.2rem 0.15rem 0.45rem;
+  border: 1px solid var(--xp-border-strong);
+  border-radius: 4px;
+  background: #293b41;
+  color: var(--xp-text);
+  font-size: var(--font-size-12, 0.75rem);
+}
+
+.pf2e-xp-tool-dialog .trait-card > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf2e-xp-tool-dialog .trait-mode {
+  display: inline-flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--xp-border-strong);
+  border-radius: 4px;
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-mode-btn {
+  width: auto;
+  min-width: 2.35rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0 0.4rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--xp-text-muted);
+  font-size: var(--font-size-11, 0.6875rem);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-mode-btn + .trait-mode-btn {
+  border-left: 1px solid var(--xp-border-strong);
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-mode-btn.active {
+  background: var(--xp-border-strong);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-remove,
+.pf2e-xp-tool-dialog .xp-theme-row .trait-add {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 4px;
+  font-size: var(--font-size-11, 0.6875rem);
+  line-height: 1;
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-add {
+  display: inline-flex;
+  gap: 0.35rem;
+  width: auto;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  color: var(--xp-text);
+  font-size: var(--font-size-12, 0.75rem);
+}
+
+.pf2e-xp-tool-dialog .xp-theme-row .trait-remove {
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--xp-text-muted);
+}
+
+.pf2e-xp-tool-dialog .trait-picker {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  z-index: 20;
+  width: min(22rem, 100%);
+  border: 1px solid var(--xp-border-strong);
+  border-radius: 4px;
+  background: var(--xp-bg);
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+.pf2e-xp-tool-dialog .trait-search {
+  width: calc(100% - 0.7rem);
+  height: 1.75rem;
+  margin: 0.35rem;
+  border: 1px solid var(--xp-border-strong);
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+.pf2e-xp-tool-dialog .trait-picker-options {
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.pf2e-xp-tool-dialog .trait-option {
+  display: block;
+  width: 100%;
+  min-height: 1.8rem;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--xp-text);
+  text-align: left;
+}
+
+.pf2e-xp-tool-dialog .trait-option:hover,
+.pf2e-xp-tool-dialog .trait-option:focus-visible {
+  background: var(--xp-border-strong);
+}
+
+.pf2e-xp-tool-dialog .trait-option[hidden] { display: none; }
+
+.pf2e-xp-tool-dialog .xp-tool .xp-stat {
+  padding: 0.3rem 0.45rem;
+  border-radius: var(--xp-radius);
+  background: linear-gradient(180deg, #1d2530, #171d25);
+}
+
+.pf2e-xp-tool-dialog .xp-tool .xp-stat-label {
+  margin-bottom: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pf2e-xp-tool-dialog .encounter-route {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) auto minmax(8rem, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--xp-border);
+  border-radius: var(--xp-radius) var(--xp-radius) 0 0;
+  background: linear-gradient(90deg, rgba(36, 44, 55, 0.85), rgba(26, 32, 41, 0.85));
+}
+
+.pf2e-xp-tool-dialog .route-point {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.1rem 0.45rem;
+  align-items: baseline;
+}
+
+.pf2e-xp-tool-dialog .route-point .route-label {
+  grid-column: 1 / -1;
+  color: var(--xp-text-subtle);
+  font-size: var(--font-size-10, 0.625rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pf2e-xp-tool-dialog .route-point strong { font-size: var(--font-size-14, 0.875rem); }
+.pf2e-xp-tool-dialog .route-point > span:last-child { color: var(--xp-text-muted); font-family: var(--font-monospace, monospace); }
+.pf2e-xp-tool-dialog .route-point.trivial strong { color: #67dce5; }
+.pf2e-xp-tool-dialog .route-point.low strong { color: #7cdb8a; }
+.pf2e-xp-tool-dialog .route-point.moderate strong { color: #e3d85b; }
+.pf2e-xp-tool-dialog .route-point.severe strong { color: #f2a34b; }
+.pf2e-xp-tool-dialog .route-point.extreme strong { color: var(--xp-danger); }
+.pf2e-xp-tool-dialog .route-arrow { color: var(--xp-text-subtle); }
+
+.pf2e-xp-tool-dialog .encounter-route .gap-label {
+  min-width: 5.5rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  text-align: center;
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-wrap { margin: 0; }
+.pf2e-xp-tool-dialog .xp-tool .xp-bar {
+  height: 7px;
+  border-top: 0;
+  border-radius: 0 0 var(--xp-radius) var(--xp-radius);
+  overflow: hidden;
+}
+.pf2e-xp-tool-dialog .xp-tool .xp-bar-fill { transition: width 0.16s ease; }
+
+.pf2e-xp-tool-dialog .npc-column-head,
+.pf2e-xp-tool-dialog .npc-card {
+  grid-template-columns: minmax(9rem, 1fr) auto auto auto minmax(4.8rem, auto);
+}
+
+.pf2e-xp-tool-dialog .npc-column-head {
+  display: grid;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.25rem 0.45rem 0.35rem;
+  color: var(--xp-text-subtle);
+  font-size: var(--font-size-10, 0.625rem);
+  letter-spacing: 0.07em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.pf2e-xp-tool-dialog .npc-column-head > span:first-child { text-align: left; }
+
+.pf2e-xp-tool-dialog .xp-tool .npc-card {
+  padding: 0.28rem 0.45rem;
+  border-bottom-color: rgba(89, 103, 121, 0.38);
+}
+.pf2e-xp-tool-dialog .xp-tool .npc-card:nth-of-type(even) { background: rgba(255, 255, 255, 0.018); }
+.pf2e-xp-tool-dialog .xp-tool .npc-card:hover { background: rgba(255, 255, 255, 0.035); }
+
+.pf2e-xp-tool-dialog .npc-sheet-link {
+  display: inline;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--xp-text);
+  font: inherit;
+  font-weight: 600;
+  line-height: inherit;
+  text-align: left;
+  box-shadow: none;
+}
+.pf2e-xp-tool-dialog .npc-sheet-link:hover:not(:disabled),
+.pf2e-xp-tool-dialog .npc-sheet-link:focus-visible {
+  border: 0;
+  background: transparent;
+  color: var(--xp-accent-hover);
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.pf2e-xp-tool-dialog .xp-tool .adj-toggle,
+.pf2e-xp-tool-dialog .hp-boost-btn,
+.pf2e-xp-tool-dialog .hp-boost-all-btn { border-radius: 4px; overflow: hidden; }
+.pf2e-xp-tool-dialog .hp-boost-all-btn { min-width: 5.6rem; text-transform: none; letter-spacing: normal; }
+
+.pf2e-xp-tool-dialog .plan-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.35rem;
+}
+.pf2e-xp-tool-dialog .plan-filter {
+  width: auto;
+  min-width: 4.5rem;
+  margin: 0;
+  padding: 0.18rem 0.65rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--xp-text-muted);
+  font-size: var(--font-size-11, 0.6875rem);
+  line-height: 1.5;
+  box-shadow: none;
+}
+.pf2e-xp-tool-dialog .plan-filter.active {
+  border-color: var(--xp-accent);
+  background: rgba(217, 162, 74, 0.16);
+  color: var(--xp-accent-hover);
+  font-weight: bold;
+}
+
+.pf2e-xp-tool-dialog .xp-tool .plan-row {
+  margin: 2px 0;
+  padding: 0.34rem 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(12, 16, 21, 0.35);
+}
+.pf2e-xp-tool-dialog .xp-tool .plan-row.clickable:hover {
+  border-color: var(--xp-border-strong);
+  background: var(--xp-surface-raised);
+}
+.pf2e-xp-tool-dialog .xp-tool .plan-row.selected {
+  border-color: var(--xp-accent);
+  background: rgba(217, 162, 74, 0.13);
+  box-shadow: inset 3px 0 0 var(--xp-accent);
+}
+.pf2e-xp-tool-dialog .xp-tool .plan-desc { font-weight: 500; }
+.pf2e-xp-tool-dialog .xp-tool .empty-msg.success { color: var(--xp-success); }
+
+.pf2e-xp-tool-dialog .xp-tool .btn-row {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) auto auto auto;
+  gap: 0.45rem;
+  align-items: center;
+  margin: 0.15rem -0.15rem -0.15rem;
+  padding: 0.55rem;
+  border: 1px solid var(--xp-border);
+  border-radius: var(--xp-radius);
+  background: rgba(17, 21, 27, 0.97);
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.25);
+}
+.pf2e-xp-tool-dialog .xp-tool .btn-row .spacer { display: none; }
+.pf2e-xp-tool-dialog .xp-tool .btn-row button { width: auto; min-width: 7.5rem; margin: 0; }
+.pf2e-xp-tool-dialog .xp-tool .btn-row .bright { min-width: 11rem; }
+.pf2e-xp-tool-dialog .selected-plan-summary {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--xp-text-subtle);
+  font-size: var(--font-size-10, 0.625rem);
+}
+.pf2e-xp-tool-dialog .selected-plan-summary strong {
+  overflow: hidden;
+  color: var(--xp-text);
+  font-size: var(--font-size-11, 0.6875rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .pf2e-xp-tool-dialog .xp-theme-row { align-items: stretch; flex-direction: column; gap: 0.3rem; }
+  .pf2e-xp-tool-dialog .xp-header { grid-template-columns: 1fr 1fr; }
+  .pf2e-xp-tool-dialog .xp-stat.target { grid-column: 1 / -1; }
+  .pf2e-xp-tool-dialog .encounter-route { grid-template-columns: 1fr auto 1fr; }
+  .pf2e-xp-tool-dialog .encounter-route .gap-label { grid-column: 1 / -1; }
+  .pf2e-xp-tool-dialog .xp-tool .btn-row { grid-template-columns: 1fr 1fr; }
+  .pf2e-xp-tool-dialog .selected-plan-summary { grid-column: 1 / -1; }
+}

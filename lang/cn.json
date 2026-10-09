@@ -47,6 +47,27 @@
       "applyFailed": "应用模板失败"
     },
     "plans": {
+      "theme": "主题 / 特征",
+      "themePlaceholder": "搜索特征",
+      "addTrait": "添加特征",
+      "themeMode": "特征匹配",
+      "themeModeHint": { "or": "匹配任一选定特征", "and": "匹配所有选定特征" },
+      "removeTrait": "移除 {trait}",
+      "noThemeMatches": "所需等级没有匹配主题的生物",
+      "quickGroup": "快速冒险队伍",
+      "quickGroupAuto": "自动推荐",
+      "quickGroupDesc": "{name}：添加 {parts}",
+      "quickGroupNote": "将此队伍添加到已选单位。应用前请比较经验值与目标。",
+      "quickGroupUnavailable": "所需等级缺少匹配的生物",
+      "quickGroupOptions": {
+        "boss-lackeys": "首领与喽啰",
+        "boss-lieutenant": "首领与副手",
+        "elite-enemies": "精锐敌人",
+        "lieutenant-lackeys": "副手与喽啰",
+        "mated-pair": "成对敌人",
+        "troop": "小队",
+        "mook-squad": "杂兵群"
+      },
       "title": "推荐方案",
       "titleWithCount": "推荐方案 ({shown}/{total})",
       "done": "已达成目标，无需调整 ✓",

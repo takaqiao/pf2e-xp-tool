@@ -8,13 +8,35 @@
       "normal": { "label": "Normal", "short": "N" },
       "elite":  { "label": "Elite",  "short": "E" }
     },
+    "hpBoost": {
+      "short": "H+",
+      "active": "H+{percent}%",
+      "title": "Fortify to target: +{percent}% HP; effective XP fills remaining budget",
+      "selectAll": "Fortify all",
+      "clearAll": "Clear fortify",
+      "allTitle": "Toggle Fortify HP for all selected enemies",
+      "warning": "Fortify requires +{percent}% HP. Consider selecting more enemies or adding a creature."
+    },
     "header": {
       "partySize": "Size",
       "partyLevel": "Level",
-      "threat": "Threat"
+      "target": "Target",
+      "threat": "Current threat",
+      "previewThreat": "Preview threat"
+    },
+    "difficulty": {
+      "baseline": "Original budget",
+      "trivial": "Trivial",
+      "low": "Low",
+      "moderate": "Moderate",
+      "severe": "Severe",
+      "extreme": "Extreme",
+      "custom": "Custom",
+      "customXP": "Custom XP target"
     },
     "progress": {
-      "currentTarget": "{current} / {target} XP"
+      "currentTarget": "{current} / {target} XP",
+      "previewCurrentTarget": "Preview: {current} / {target} XP"
     },
     "gap": {
       "match": "On target ✓",
@@ -27,7 +49,15 @@
       "hazardsLabel": "Hazards: ",
       "pendingApply": "({n} pending)",
       "summary": "{npcs} creature(s)",
-      "summaryWithHazards": "{npcs} creature(s) / {hazards} hazard(s)"
+      "summaryWithHazards": "{npcs} creature(s) / {hazards} hazard(s)",
+      "previewAdd": "PREVIEW ADD",
+      "previewAddN": "(+{n} preview)",
+      "levelCreature": "Lv {level} creature",
+      "creature": "Creature",
+      "level": "Level",
+      "xp": "XP",
+      "template": "Template",
+      "openSheet": "Open creature sheet"
     },
     "btn": {
       "cancel": "Cancel",
@@ -36,21 +66,62 @@
       "reset": "Reset preview",
       "applyN": "Apply {n} template change(s)",
       "noChanges": "No pending changes",
+      "selectPlan": "Select a plan",
       "applying": "Applying…",
-      "previewPlan": "Preview this plan"
+      "previewPlan": "Preview this plan",
+      "undo": "Undo last apply",
+      "undoing": "Undoing...",
+      "applyPlan": "Apply plan ({templates} templates, {creatures} creatures)",
+      "applyCreatures": "Add {n} creature(s)",
+      "applyMixed": "Apply {templates} change(s) + {creatures} creature(s)"
     },
     "notif": {
       "gmOnly": "GM-only tool",
       "needSelection": "Select at least one opposition or hazard token in the scene (PCs optional)",
       "applied": "Applied {n} template change(s)",
       "partialApplied": "Applied {applied}; failed: {names}",
-      "applyFailed": "Failed to apply template"
+      "applyFailed": "Failed to apply template",
+      "undone": "Restored {n} template change(s)",
+      "partialUndo": "Restored {restored}; failed: {names}",
+      "undoFailed": "Failed to undo template",
+      "candidateLoadFailed": "Could not load creature compendium suggestions",
+      "candidateOpenFailed": "Could not open suggested creature",
+      "addCreatureFailed": "Could not add suggested creature",
+      "undoAddedFailed": "Could not remove added creature during undo",
+      "appliedPlan": "Applied {templates} template change(s) and added {creatures} creature(s)",
+      "undonePlan": "Restored {templates} template change(s) and removed {creatures} added creature(s)"
     },
     "plans": {
+      "theme": "Theme / Traits",
+      "themePlaceholder": "Search traits",
+      "addTrait": "Add trait",
+      "themeMode": "Trait matching",
+      "themeModeHint": { "or": "Match any selected trait", "and": "Match every selected trait" },
+      "removeTrait": "Remove {trait}",
+      "noThemeMatches": "No matching creatures at required levels",
+      "quickGroup": "Quick Adventure Group",
+      "quickGroupAuto": "Auto suggestions",
+      "quickGroupDesc": "{name}: Add {parts}",
+      "quickGroupNote": "Adds this group to selected units. Compare its XP with the target before applying.",
+      "quickGroupUnavailable": "No matching creatures at every required level",
+      "quickGroupOptions": {
+        "boss-lackeys": "Boss and Lackeys",
+        "boss-lieutenant": "Boss and Lieutenant",
+        "elite-enemies": "Elite Enemies",
+        "lieutenant-lackeys": "Lieutenant and Lackeys",
+        "mated-pair": "Mated Pair",
+        "troop": "Troop",
+        "mook-squad": "Mook Squad"
+      },
       "title": "Suggested plans",
       "titleWithCount": "Suggested plans ({shown}/{total})",
+      "hazardTitle": "Hazard adjustments",
       "done": "Target met, nothing to adjust ✓",
       "empty": "No plans available",
+      "emptyFiltered": "No plans in this strategy",
+      "selected": "Selected plan",
+      "selectionHint": "Choose a suggestion or adjust creatures manually",
+      "filter": { "best": "Best", "creatures": "Creatures", "templates": "Templates", "mixed": "Mixed" },
       "noteFallback": "No exact plans; showing closest approximations",
       "addDesc": "Add {parts}",
       "removeDesc": "Remove {parts}",
@@ -58,7 +129,14 @@
       "adjustDescTwo": "{a} → {ta}, {b} → {tb}",
       "adjustDescMore": "{name} → {to} +{extra} more",
       "compositeDesc": "{adjust} + {add}",
-      "previewHint": "Click row to preview"
+      "previewHint": "Click row to preview",
+      "simpleHazard": "simple hazard",
+      "complexHazard": "complex hazard",
+      "addHazardDesc": "Add {type}: {parts}",
+      "removeHazardDesc": "Remove {type}: {parts}",
+      "creatureCandidate": "{count}× {name} · Lv {level}",
+      "candidatesLoading": "Loading real creature matches...",
+      "openCandidateHint": "Click to open suggested creature"
     },
     "card": {
       "ops": "{n} op(s)"

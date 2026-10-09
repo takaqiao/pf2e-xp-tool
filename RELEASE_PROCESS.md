@@ -5,7 +5,7 @@
 ```
 pf2e-xp-tool/
 ├── module.json                  # FVTT module descriptor (id / version / manifest / download / compatibility)
-├── scripts/main.js              # Main code (Hooks register the sidebar button + XP tool)
+├── scripts/                     # ES modules: entry, core, view, actions, localization, runtime
 ├── styles/main.css              # UI styles, namespaced under .xp-tool
 ├── lang/
 │   ├── en.json                  # English translation
@@ -22,7 +22,7 @@ pf2e-xp-tool/
 
 ### 1. Code changes
 
-Edit `scripts/main.js` / `styles/main.css` / `lang/*.json` and verify the module locally inside FVTT.
+Edit the relevant file under `scripts/`, `styles/main.css`, or `lang/*.json` and verify the module locally inside FVTT. `module.json` loads `scripts/main.mjs` as the ES module entry.
 
 ### 2. Update three fields in `module.json`
 

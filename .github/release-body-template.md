@@ -8,9 +8,9 @@ https://github.com/takaqiao/pf2e-xp-tool/releases/latest/download/module.json
 
 ## Compatibility
 
-- Foundry VTT v12 ~ v14
+- Foundry VTT: minimum v12; verified v14
 - PF2e system
 
 ## Changes
 
-See the commits associated with this tag for the full change list.
+Remove the Foundry core upper-version installation limit. Minimum and verified versions and PF2e requirements remain unchanged.
